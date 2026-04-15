@@ -2,6 +2,7 @@ import heapq
 import json
 import uuid
 
+#status -> InquiryStatus
 class Attributes:
     """ For O(1) searching -> faster algorithm """
     def __init__(self):
