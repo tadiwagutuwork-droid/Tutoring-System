@@ -22,7 +22,6 @@ class Attributes:
     def subject_index(self):
         return self.__subject_index
 
-
 class Inquiry(Attributes):
     def __init__(self, name, grade, subject, descri, urgency, submitted_at, status, claimed_by=False, id=False):
         super().__init__()
