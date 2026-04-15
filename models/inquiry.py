@@ -2,13 +2,29 @@ import heapq
 import json
 import uuid
 
+class Attributes:
+    """ For O(1) searching -> faster algorithm """
+    def __init__(self):
+        self.__grades = {7, 8, 9, 10, 11, 12}
+        self.__subject_index = {'Mathematics': {7, 8, 9, 10, 11, 12}, 
+                                'Physical Sciences': {10, 11, 12}, 
+                                'Geography': {7, 8, 9, 10, 11, 12}, 
+                                'Life Sciences': {10, 11, 12}, 
+                                'Natural Sciences': {7, 8, 9}
+                                }
+    
+    @property
+    def grades(self):
+        return self.__grades
+    
+    @property
+    def subject_index(self):
+        return self.__subject_index
 
-class Inquiry:
-    # for O(1) searching -> faster algorithm
-    subjects = {'Mathematics', 'Physical Sciences', 'Geography', 'Life Sciences', 'Social Sciences', 'Natural Sciences'}
-    grades = {7, 8, 9, 10, 11, 12}
 
+class Inquiry(Attributes):
     def __init__(self, name, grade, subject, descri, urgency, submitted_at, status, claimed_by=None, id=None):
+        super().__init__()
         self.__inquiry_id = str(uuid.uuid4()) if id is not None else None
         self.__learner_name = name
         self.__grade = grade
@@ -42,8 +58,9 @@ class Inquiry:
     
     @grade.setter
     def grade(self, value):
-        if not isinstance(value, (int, str, float)) and int(value) not in Inquiry.grades:
+        if not (isinstance(value, (int, str, float)) and int(value) in self.grades):
             raise ValueError("Invalid grade given!")
+        self.verify_subject(int(value))
         self.__grade = int(value)
     
     @property
@@ -53,8 +70,9 @@ class Inquiry:
     @subject.setter
     def subject(self, value):
         #Have subject set or dictionary for subjects you offer and verify with grade too
-        if not isinstance(value, str) and value.title() not in Inquiry.subjects:
+        if not (isinstance(value, str) and value.title() in self.subject_index):
             raise ValueError("Invalid subject given!")
+        self.verify_grade(value)
         self.__subject = value.title()
     
     @property
@@ -83,7 +101,26 @@ class Inquiry:
     def claimed_by(self):
         return self.__claimed_by
     
+    @claimed_by.setter
+    def claimed_by(self, value):
+        if not isinstance(value, str):
+            raise ValueError("Invalid name given!")
+        self.__claimed_by = value.title()
     
+    # Methods
+    def verify_subject(self, grade):
+        grades = self.subject_index.get(self.__subject, -1)
+        if grades != -1:
+            if grade not in grades: # -> a set is returned so time complexity is O(n)
+                raise ValueError(f"No grade {grade} in {self.__subject}!")
+            
+    def verify_grade(self, subject):
+        if subject.title() not in self.subject_index:
+            raise ValueError(f"{subject.title()} not found in subjects!")
+        
+
+
+
 
         
     
