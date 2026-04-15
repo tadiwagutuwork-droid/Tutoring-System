@@ -33,7 +33,7 @@ class Inquiry(Attributes):
         self.__urgency = urgency # needs to be converted to a string
         self.__submitted_at = submitted_at # needs to be converted to a string
         self.__status = status # needs to be converted to a string
-        self.__claimed_by = claimed_by if not claimed_by else 'N/A' #Tutor's name
+        self.__claimed_by = claimed_by if claimed_by else 'N/A' #Tutor's name
 
 #define getters and setters before anything else
     
