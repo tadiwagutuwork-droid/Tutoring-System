@@ -24,17 +24,17 @@ class Attributes:
 
 
 class Inquiry(Attributes):
-    def __init__(self, name, grade, subject, descri, urgency, submitted_at, status, claimed_by=None, id=None):
+    def __init__(self, name, grade, subject, descri, urgency, submitted_at, status, claimed_by=False, id=False):
         super().__init__()
-        self.__inquiry_id = str(uuid.uuid4()) if id is not None else None
+        self.__inquiry_id = str(uuid.uuid4()) if not id else id
         self.__learner_name = name
         self.__grade = grade
         self.__subject = subject
         self.__description = descri
-        self.__urgency = urgency
-        self.__submitted_at = submitted_at
-        self.__status = status
-        self.__claimed_by = claimed_by if claimed_by is not None else None #Tutor's name
+        self.__urgency = urgency # needs to be converted to a string
+        self.__submitted_at = submitted_at # needs to be converted to a string
+        self.__status = status # needs to be converted to a string
+        self.__claimed_by = claimed_by if not claimed_by else 'N/A' #Tutor's name
 
 #define getters and setters before anything else
     
@@ -118,6 +118,26 @@ class Inquiry(Attributes):
     def verify_grade(self, subject):
         if subject.title() not in self.subject_index:
             raise ValueError(f"{subject.title()} not found in subjects!")
+        
+    def to_dict(self):
+        return {
+            'Inquiry ID': self.__inquiry_id, 
+            'Learner Name': self.__learner_name,
+            'Grade': self.__grade, 
+            'Subject': self.__subject,
+            'Description': self.__description, 
+            # needs to be converted to a string
+            'Urgency': 'N/A', 
+            'Submitted At': 'N/A',
+            'Status': 'N/A', 
+            #*****************************************
+            'Claimed By': self.__claimed_by
+        }
+    
+    def from_dict(cls, data_string):
+        data = json.loads(data_string) # a Python dictionary
+        claimed_by = True if data['Claimed By'] != 'N/A' else False
+        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Urgency'], data['Submitted At'], data['Status'], claimed_by, True)
         
 
 
