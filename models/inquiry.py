@@ -135,8 +135,10 @@ class Inquiry(Attributes):
     
     def from_dict(cls, data_string):
         data = json.loads(data_string) # a Python dictionary
-        claimed_by = True if data['Claimed By'] != 'N/A' else False
+        claimed_by = data['Claimed By'] != 'N/A'
         return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Urgency'], data['Submitted At'], data['Status'], claimed_by, True)
+    
+    # write the less than method (__lt__(self, other)) for comparisons, the str and repr methods
         
 
 
