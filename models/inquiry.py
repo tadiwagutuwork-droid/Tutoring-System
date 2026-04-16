@@ -143,16 +143,13 @@ class Inquiry(Attributes):
         data = json.loads(data_string) # a Python dictionary
         claimed_by = data['Claimed By'] != 'N/A'
         return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Urgency'], data['Submitted At'], data['Status'], claimed_by, True)
-    
-    # write the less than method (__lt__(self, other)) for comparisons, the str and repr methods
         
     def wait_time(self):
         """Returns how long the inquiry has been in the queue"""
         current = datetime.now()
         return current - self.__submitted_at # only do calculations with objects
     
-        
-
+    # write the less than method (__lt__(self, other)) for comparisons, the str and repr methods
 
 
         
