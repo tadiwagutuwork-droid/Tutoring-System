@@ -1,6 +1,12 @@
-import heapq
 import json
 import uuid
+import datetime
+
+# # 1. Get current time
+# now = datetime.now()
+
+# # 2. Format it as a string
+# formatted_now = now.strftime("%Y-%m-%d %H:%M:%S")
 
 #status -> InquiryStatus
 class Attributes:
@@ -31,7 +37,7 @@ class Inquiry(Attributes):
         self.__subject = subject
         self.__description = descri
         self.__urgency = urgency # needs to be converted to a string
-        self.__submitted_at = submitted_at # needs to be converted to a string
+        self.__submitted_at = submitted_at # "%Y-%m-%d %H:%M:%S"
         self.__status = status # needs to be converted to a string
         self.__claimed_by = claimed_by if claimed_by else 'N/A' #Tutor's name
 
@@ -127,7 +133,7 @@ class Inquiry(Attributes):
             'Description': self.__description, 
             # needs to be converted to a string
             'Urgency': 'N/A', 
-            'Submitted At': 'N/A',
+            'Submitted At': self.__submitted_at.strftime("%Y-%m-%d %H:%M:%S"), # it is a string not an object
             'Status': 'N/A', 
             #*****************************************
             'Claimed By': self.__claimed_by
@@ -140,7 +146,12 @@ class Inquiry(Attributes):
     
     # write the less than method (__lt__(self, other)) for comparisons, the str and repr methods
         
-
+    def wait_time(self):
+        """Returns how long the inquiry has been in the queue"""
+        current = datetime.now()
+        return current - self.__submitted_at # only do calculations with objects
+    
+        
 
 
 
