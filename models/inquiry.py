@@ -152,6 +152,6 @@ class Inquiry(Attributes):
     
     # write the less than method (__lt__(self, other)) for comparisons, the str and repr methods
 
-
-        
+    def __lt__(self, other):
+        return self.__submitted_at < other.__submitted_at
     
