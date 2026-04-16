@@ -143,7 +143,7 @@ class Inquiry(Attributes):
         # remember the cls instances
         data = json.loads(data_string) # a Python dictionary
         claimed_by = data['Claimed By'] != 'N/A' 
-        return cls(data['Learner Name'], int(data['Grade']), data['Subject'], data['Urgency'], datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), data['Status'], claimed_by, True)
+        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Urgency'], datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), data['Status'], claimed_by, True)
         
     def wait_time(self):
         """Returns how long the inquiry has been in the queue"""
