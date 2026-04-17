@@ -1,8 +1,8 @@
 import json
 import uuid
 from datetime import datetime
-from urgency_level import UrgencyLevel
-from inquiry_status import InquiryStatus
+from .urgency_level import UrgencyLevel
+from .inquiry_status import InquiryStatus
 
 # # 1. Get current time
 # now = datetime.now()
