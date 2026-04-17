@@ -31,7 +31,7 @@ class Attributes:
         return self.__subject_index
 
 class Inquiry(Attributes):
-    def __init__(self, name, grade, subject, description, urgency, submitted_at, status, claimed_by=False, inquiry_id=False):
+    def __init__(self, name, grade, subject, description, urgency, submitted_at, claimed_by=False, inquiry_id=False, status=InquiryStatus.return_status(1)):
         super().__init__()
         self.__inquiry_id = str(uuid.uuid4()) if not id else inquiry_id
         self.__learner_name = name
@@ -166,7 +166,7 @@ class Inquiry(Attributes):
         # remember the cls instances
         data = json.loads(data_string) # a Python dictionary
         claimed_by = data['Claimed By'] != 'N/A'
-        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Description'], UrgencyLevel.return_urgency(data['Urgency']), datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), InquiryStatus.return_status(data['Status']), claimed_by, True)
+        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Description'], UrgencyLevel.return_urgency(data['Urgency']), datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), claimed_by, True, InquiryStatus.return_status(data['Status']))
         
     def wait_time(self):
         """Returns how long the inquiry has been in the queue"""
