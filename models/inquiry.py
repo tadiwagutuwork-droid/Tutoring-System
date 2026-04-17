@@ -29,13 +29,13 @@ class Attributes:
         return self.__subject_index
 
 class Inquiry(Attributes):
-    def __init__(self, name, grade, subject, descri, urgency, submitted_at, status, claimed_by=False, id=False):
+    def __init__(self, name, grade, subject, description, urgency, submitted_at, status, claimed_by=False, inquiry_id=False):
         super().__init__()
-        self.__inquiry_id = str(uuid.uuid4()) if not id else id
+        self.__inquiry_id = str(uuid.uuid4()) if not id else inquiry_id
         self.__learner_name = name
         self.__grade = grade
         self.__subject = subject
-        self.__description = descri
+        self.__description = description
         self.__urgency = urgency # needs to be converted to a string
         self.__submitted_at = submitted_at # "%Y-%m-%d %H:%M:%S"
         self.__status = status # needs to be converted to a string
@@ -150,8 +150,36 @@ class Inquiry(Attributes):
         current = datetime.now()
         return current - self.__submitted_at # only do calculations with objects
     
-    # write the less than method (__lt__(self, other)) for comparisons, the str and repr methods
-
+    # Finish implementing __lt__ method
     def __lt__(self, other):
         return self.__submitted_at < other.__submitted_at
+    
+    def __str__(self):
+        return f"""
+===============  TUTORING INQUIRY ===============
+Learner's Name: {self.__learner_name}
+Subject: {self.__subject}
+Description: {self.__description}
+Urgency: {self.__urgency}
+Submitted At: {self.__submitted_at}
+Status: {self.__status}
+Claimed By: {self.__claimed_by}
+
+=================================================
+"""
+    
+    def __repr__(self):
+        return f"""
+Inquiry(
+    name={self.__learner_name}, 
+    grade={self.__grade}, 
+    subject={self.__subject},
+    description={self.__description}, 
+    urgency={self.__urgency}, 
+    submitted_at={self.__submitted_at}, 
+    status={self.__status}, 
+    claimed_by={self.__claimed_by}
+    inquiry_id={self.__inquiry_id}
+    )
+"""
     
