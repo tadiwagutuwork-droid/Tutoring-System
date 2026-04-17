@@ -1,6 +1,8 @@
 import json
 import uuid
 from datetime import datetime
+from urgency_level import UrgencyLevel
+from inquiry_status import InquiryStatus
 
 # # 1. Get current time
 # now = datetime.now()
@@ -36,9 +38,9 @@ class Inquiry(Attributes):
         self.__grade = grade
         self.__subject = subject
         self.__description = description
-        self.__urgency = urgency # needs to be converted to a string
+        self.__urgency = urgency 
         self.__submitted_at = submitted_at # "%Y-%m-%d %H:%M:%S"
-        self.__status = status # needs to be converted to a string
+        self.__status = status
         self.__claimed_by = claimed_by if claimed_by else 'N/A' #Tutor's name
 
 #define getters and setters before anything else
@@ -96,13 +98,13 @@ class Inquiry(Attributes):
     def urgency(self):
         return self.__urgency
     
-    # @urgency.setter
-    # def urgency(self, value):
-    #     if not isinstance(value, classOfStatus):
-    #         raise ValueError("Invalid instance of urgency provided!")
-    #     self.__urgency = value
+    @urgency.setter
+    def urgency(self, value):
+        if not isinstance(value, UrgencyLevel):
+            raise ValueError("Invalid instance of urgency provided!")
+        self.__urgency = value
     
-    # # add setter for submitted_at -> in case of changes
+    # add setter for submitted_at -> in case of changes
     @property
     def submitted_at(self):
         return self.__submitted_at
@@ -120,7 +122,7 @@ class Inquiry(Attributes):
     
     # @status.setter
     # def status(self, value):
-    #     if not isinstance(value, classOfStatus):
+    #     if not isinstance(value, InquiryStatus):
     #         raise ValueError("Invalid instance of status provided!")
     #     self.__status = value
         
@@ -152,19 +154,19 @@ class Inquiry(Attributes):
             'Grade': self.__grade, 
             'Subject': self.__subject,
             'Description': self.__description, 
-            # needs to be converted to a string
-            'Urgency': 'N/A', 
+            'Urgency': self.__urgency, 
             'Submitted At': self.__submitted_at.strftime("%Y-%m-%d %H:%M:%S"), # it is a string not an object
-            'Status': 'N/A', 
+            'Status': self.__status, 
             #*****************************************
             'Claimed By': self.__claimed_by
         }
     
+    @classmethod
     def from_dict(cls, data_string):
         # remember the cls instances
         data = json.loads(data_string) # a Python dictionary
-        claimed_by = data['Claimed By'] != 'N/A' 
-        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Urgency'], datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), data['Status'], claimed_by, True)
+        claimed_by = data['Claimed By'] != 'N/A'
+        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Description'], UrgencyLevel.return_urgency(data['Urgency']), datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), InquiryStatus.return_status(data['Status']), claimed_by, True)
         
     def wait_time(self):
         """Returns how long the inquiry has been in the queue"""
@@ -182,9 +184,9 @@ Learner's Name: {self.__learner_name}
 Grade: {self.__grade}
 Subject: {self.__subject}
 Description: {self.__description}
-Urgency: {self.__urgency}
+Urgency: {self.__urgency.name}
 Submitted At: {self.__submitted_at}
-Status: {self.__status}
+Status: {self.__status.name}
 Claimed By: {self.__claimed_by}
 =================================================
 """
