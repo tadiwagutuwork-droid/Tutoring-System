@@ -1,4 +1,5 @@
 from enum import IntEnum
+from errors import queue_error as q
 
 class UrgencyLevel(IntEnum):
     CRITICAL = 1 # Exam or assessment within 24 hours.
@@ -21,12 +22,12 @@ Choose option:
 """
         level = int(input(menu))
         if level not in {1, 2, 3, 4}:
-            raise ValueError("Invalid value of level of urgency!")
+            raise q.InvalidUrgencyError()
         return cls(level)
     
     @classmethod
     def return_urgency(cls, value):
         if value not in {1, 2, 3, 4}:
-            raise ValueError("Invalid value of level of urgency!")
+            raise q.InvalidUrgencyError()
         return cls(value)
 

@@ -1,4 +1,5 @@
 from operator import attrgetter
+from errors import queue_error as q
 import heapq
 import models
 import json
@@ -12,16 +13,15 @@ class TutoringQueue:
 
     def verify_object(self, value):
         if not isinstance(value, models.Inquiry):
-            raise ValueError("Invalid value of Inquiry class!")
+            raise q.WrongInstanceError('Inquiry')
    
     def is_empty(self):
         if not self.__heap:
-            raise ValueError("Queue is empty")
+            raise q.EmptyQueueError()
     
     def is_empty_history(self):
         if not self.__history:
-            raise ValueError("History is empty")
-
+            raise q.HistoryQueueEmptyError()
     def enqueue(self, value):
         self.verify_object(value)
         heapq.heappush(self.__heap, value)
@@ -52,7 +52,7 @@ class TutoringQueue:
         data_to_save = [item.to_dict() for item in self.__heap]
         
         if not data_to_save:
-            raise ValueError("Empty data list")
+            raise q.EmptyQueueError()
         with open('inquiries.json', 'w') as f:
             json.dump(data_to_save, f, indent=4)
 
@@ -61,7 +61,7 @@ class TutoringQueue:
             data = json.load(f)
         
         if not data:
-            raise ValueError("Empty json file")
+            raise q.JSONFileEmptyError()
         data_to_load = [models.Inquiry.from_dict(item) for item in data]
         heapq.heapify(data_to_load)
         print(f"Successfully restored {len(data_to_load)} inquiries.")

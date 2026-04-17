@@ -1,4 +1,5 @@
 from enum import IntEnum
+from errors import queue_error as q
 
 class InquiryStatus(IntEnum):
     PENDING = 1 # In the queue, not yet claimed.
@@ -20,12 +21,12 @@ Choose option:
 """
         level = int(input(menu))
         if level not in {1, 2, 3, 4}:
-            raise ValueError("Invalid value of level of status!")
+            raise q.InvalidStatusError()
         return cls(level)
     
     @classmethod
     def return_status(cls, value):
         if value not in {1, 2, 3, 4}:
-            raise ValueError("Invalid value of level of status!")
+            raise q.InvalidStatusError()
         return cls(value)
 
