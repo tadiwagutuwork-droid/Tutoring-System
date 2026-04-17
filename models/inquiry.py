@@ -1,6 +1,6 @@
 import json
 import uuid
-import datetime
+from datetime import datetime
 
 # # 1. Get current time
 # now = datetime.now()
@@ -91,18 +91,39 @@ class Inquiry(Attributes):
             raise ValueError("Invalid description given!")
         self.__description = value.capitalize()
     
+    # add setter for urgency
     @property
     def urgency(self):
         return self.__urgency
     
+    # @urgency.setter
+    # def urgency(self, value):
+    #     if not isinstance(value, classOfStatus):
+    #         raise ValueError("Invalid instance of urgency provided!")
+    #     self.__urgency = value
+    
+    # # add setter for submitted_at -> in case of changes
     @property
     def submitted_at(self):
         return self.__submitted_at
     
+    @submitted_at.setter
+    def submitted_at(self, value):
+        if not isinstance(value, datetime):
+            raise ValueError("Invalid format for date and time provided!")
+        self.__submitted_at = value
+        
+    # add setter for status
     @property
     def status(self):
         return self.__status
     
+    # @status.setter
+    # def status(self, value):
+    #     if not isinstance(value, classOfStatus):
+    #         raise ValueError("Invalid instance of status provided!")
+    #     self.__status = value
+        
     @property
     def claimed_by(self):
         return self.__claimed_by
@@ -158,13 +179,13 @@ class Inquiry(Attributes):
         return f"""
 ===============  TUTORING INQUIRY ===============
 Learner's Name: {self.__learner_name}
+Grade: {self.__grade}
 Subject: {self.__subject}
 Description: {self.__description}
 Urgency: {self.__urgency}
 Submitted At: {self.__submitted_at}
 Status: {self.__status}
 Claimed By: {self.__claimed_by}
-
 =================================================
 """
     
