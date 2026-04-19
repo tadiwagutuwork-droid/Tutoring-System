@@ -36,3 +36,8 @@ class WrongInstanceError(QueueError):
     def __init__(self, value):
         self.message = f"Invalid instance of {value.title()} class"
         super().__init__(self.message)
+
+class WrongHeapError(QueueError):
+    def __init__(self):
+        self.message = f"Invalid instance of heap"
+        super().__init__(self.message)

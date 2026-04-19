@@ -11,6 +11,20 @@ class TutoringQueue:
         # use this format to ensure FIFO (Urgency Level, Datetime Object, Inquiry Object)
     # implement the methods 
 
+    @property
+    def heap(self):
+        return self.__heap
+
+    @heap.setter
+    def heap(self, value):
+        if not isinstance(value, list):
+            raise q.WrongHeapError()
+        self.__heap = value
+
+    @property
+    def history(self):
+        return self.__history
+
     def verify_object(self, value):
         if not isinstance(value, models.Inquiry):
             raise q.WrongInstanceError('Inquiry')
@@ -65,5 +79,5 @@ class TutoringQueue:
         data_to_load = [models.Inquiry.from_dict(item) for item in data]
         heapq.heapify(data_to_load)
         print(f"Successfully restored {len(data_to_load)} inquiries.")
-        return data_to_load
+        self.__heap = data_to_load
     
