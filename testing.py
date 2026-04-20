@@ -2,16 +2,17 @@ from datetime import datetime, timedelta
 import models
 import queues
 
+
 now = datetime.now()
 one_hour_ago  = now - timedelta(hours=1)
 yesterday     = now - timedelta(days=1)
 three_days_ago = now - timedelta(days=3)
 
 inquiries = [
-    models.Inquiry('Tadiwa',  8,  'Mathematics',       'Exponential Functions', 3, three_days_ago),
-    models.Inquiry('Zubair',  11, 'Physical Sciences', "Newton's Laws",         2, one_hour_ago),
-    models.Inquiry('Lindiwe',  10, 'Geography',         'Plate Tectonics',       3, yesterday),
-    models.Inquiry('Ethan',   12, 'Life Sciences',     'DNA: Code of Life',     4, now),
+    models.Inquiry('Tadiwa',  8,  'Mathematics',       'Exponential Functions', models.UrgencyLevel.return_urgency(3), three_days_ago),
+    models.Inquiry('Zubair',  11, 'Physical Sciences', "Newton's Laws",         models.UrgencyLevel.return_urgency(2), one_hour_ago),
+    models.Inquiry('Lindiwe',  10, 'Geography',         'Plate Tectonics',       models.UrgencyLevel.return_urgency(3), yesterday),
+    models.Inquiry('Ethan',   12, 'Life Sciences',     'DNA: Code of Life',     models.UrgencyLevel.return_urgency(4), now),
 ]
 
 queue = queues.TutoringQueue()
@@ -32,7 +33,8 @@ for i in inquiries:
     queue.enqueue(i)
 
 queue.dequeue()
-queue.dequeue()
-queue.dequeue()
+lst = queue.list_pending()
+for l in lst:
+    print(l)
 
-print(queue.heap)
+

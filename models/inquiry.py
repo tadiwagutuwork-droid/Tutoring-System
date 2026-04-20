@@ -250,7 +250,7 @@ Grade: {self.__grade}
 Subject: {self.__subject}
 Description: {self.__description}
 Urgency: {self.__urgency.name}
-Submitted At: {self.__submitted_at}
+Submitted At: {self.__submitted_at.strftime("Date: %Y-%m-%d || Time: %H:%M:%S")[:34]}
 Status: {self.__status.name}
 Claimed By: {self.__claimed_by}
 Deadline: {self.__deadline}
