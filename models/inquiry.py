@@ -177,7 +177,7 @@ class Inquiry(Attributes):
             
     def verify_grade(self, subject):
         if subject.title() not in self.subject_index:
-            raise ValueError(f"{subject.title()} not found in subjects!")
+            raise ValueError(f"{subject.title()} not found in subjects of grade!")
         
     def to_dict(self):
         return {

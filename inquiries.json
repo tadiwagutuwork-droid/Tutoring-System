@@ -1,0 +1,46 @@
+[
+    {
+        "Inquiry ID": "f8c59e83-e057-4156-b357-a0c1c9fb4417",
+        "Learner Name": "Zubair",
+        "Grade": 11,
+        "Subject": "Physical Sciences",
+        "Description": "Newton's Laws",
+        "Urgency": 2,
+        "Submitted At": "2026-04-20 20:47:09",
+        "Status": 3,
+        "Claimed By": "Leon"
+    },
+    {
+        "Inquiry ID": "f8c59e83-e057-4156-b357-a0c1c9fb4417",
+        "Learner Name": "Tadiwa",
+        "Grade": 8,
+        "Subject": "Mathematics",
+        "Description": "Exponential Functions",
+        "Urgency": 3,
+        "Submitted At": "2026-04-17 21:47:09",
+        "Status": 3,
+        "Claimed By": "John"
+    },
+    {
+        "Inquiry ID": "f8c59e83-e057-4156-b357-a0c1c9fb4417",
+        "Learner Name": "Lindiwe",
+        "Grade": 10,
+        "Subject": "Geography",
+        "Description": "Plate Tectonics",
+        "Urgency": 3,
+        "Submitted At": "2026-04-19 21:47:09",
+        "Status": 3,
+        "Claimed By": "Forrest"
+    },
+    {
+        "Inquiry ID": "f8c59e83-e057-4156-b357-a0c1c9fb4417",
+        "Learner Name": "Ethan",
+        "Grade": 12,
+        "Subject": "Life Sciences",
+        "Description": "DNA: Code of Life",
+        "Urgency": 4,
+        "Submitted At": "2026-04-20 21:47:09",
+        "Status": 5,
+        "Claimed By": "N/A"
+    }
+]

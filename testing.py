@@ -49,3 +49,6 @@ print(queue.size())
 queue.save()
 queue.load()
 print(queue.heap)
+
+lst = list(models.Attributes().subject_index)
+print(lst)

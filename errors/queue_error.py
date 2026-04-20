@@ -56,3 +56,8 @@ class StatusEditorError(QueueError):
     def __init__(self):
         self.message = f"No tutor allocated to inquiry"
         super().__init__(self.message)
+
+class ChoiceError(QueueError):
+    def __init__(self):
+        self.message = f"Invalid input entered"
+        super().__init__(self.message)
