@@ -232,6 +232,8 @@ class Inquiry(Attributes):
     # Finish implementing __lt__ method
     def __lt__(self, other):
         if self.__urgency == other.__urgency:
+            if self.__submitted_at == other.__submitted_at:
+                return self.__learner_name < other.__learner_name
             return self.__submitted_at < other.__submitted_at
         return self.__urgency < other.__urgency
     
