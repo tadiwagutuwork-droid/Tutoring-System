@@ -194,9 +194,8 @@ class Inquiry(Attributes):
         }
     
     @classmethod
-    def from_dict(cls, data_string):
+    def from_dict(cls, data):
         # remember the cls instances
-        data = json.loads(data_string) # a Python dictionary
         claimed_by = data['Claimed By'] != 'N/A'
         return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Description'], UrgencyLevel.return_urgency(data['Urgency']), datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), claimed_by, data['Inquiry ID'], InquiryStatus.return_status(data['Status']))
         
@@ -229,8 +228,8 @@ class Inquiry(Attributes):
 
     # Finish implementing __lt__ method
     def __lt__(self, other):
-        if self.__urgency.value != other.__urgency.value:
-            return self.__urgency.value < other.__urgency.value
+        if self.__urgency != other.__urgency:
+            return self.__urgency < other.__urgency
         return self.__submitted_at < other.__submitted_at
     
     def __str__(self):

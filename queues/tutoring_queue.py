@@ -63,7 +63,7 @@ class TutoringQueue:
     
     def list_pending(self):
         self.is_empty()
-        list_copy = [i for i in self.__heap if i.status == models.InquiryStatus.PENDING].sort(key=attrgetter('urgency_level', 'submitted_at'))
+        list_copy = sorted([i for i in self.__heap if i.status == models.InquiryStatus.PENDING], key=attrgetter('urgency_level', 'submitted_at'))
         return list_copy
     
     def list_all(self):
@@ -87,5 +87,5 @@ class TutoringQueue:
         data_to_load = [models.Inquiry.from_dict(item) for item in data]
         heapq.heapify(data_to_load)
         print(f"Successfully restored {len(data_to_load)} inquiries.")
-        self.__heap = data_to_load
+        self.heap = data_to_load
     
