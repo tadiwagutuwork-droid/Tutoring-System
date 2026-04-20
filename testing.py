@@ -25,6 +25,8 @@ inquiries[1].claimed_by = 'Leon'
 inquiries[1].resolved()
 
 
+inquiries[3].cancelled()
+
 
 for i in inquiries: 
     queue.enqueue(i)
@@ -32,4 +34,5 @@ for i in inquiries:
 queue.dequeue()
 queue.dequeue()
 queue.dequeue()
+
 print(queue.heap)

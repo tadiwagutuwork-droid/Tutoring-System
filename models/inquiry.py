@@ -227,7 +227,12 @@ class Inquiry(Attributes):
             self.status = 5
 
     def resolved(self):
+        if self.__claimed_by == 'N/A':
+            raise q.StatusEditorError()
         self.status = 3
+
+    def cancelled(self):
+        self.status = 5
 
     # Finish implementing __lt__ method
     def __lt__(self, other):
