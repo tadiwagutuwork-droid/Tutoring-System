@@ -6,6 +6,7 @@ class InquiryStatus(IntEnum):
     CLAIMED = 2 # A tutor has dequeued and is actively handling it.
     RESOLVED = 3 # The inquiry has been answered and closed.
     CANCELLED = 4 # The learner withdrew the inquiry.
+    MISSED = 5
 
     @classmethod
     def status_level(cls):
@@ -20,13 +21,13 @@ class InquiryStatus(IntEnum):
 Choose option:
 """
         level = int(input(menu))
-        if level not in {1, 2, 3, 4}:
+        if level not in {1, 2, 3, 4, 5}:
             raise q.InvalidStatusError()
         return cls(level)
     
     @classmethod
     def return_status(cls, value):
-        if value not in {1, 2, 3, 4}:
+        if value not in {1, 2, 3, 4, 5}:
             raise q.InvalidStatusError()
         return cls(value)
 

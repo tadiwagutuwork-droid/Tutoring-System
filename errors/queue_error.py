@@ -46,3 +46,8 @@ class StatusHistoryError(QueueError):
     def __init__(self):
         self.message = f"Invalid status of inquiry in history"
         super().__init__(self.message)
+
+class TimeError(QueueError):
+    def __init__(self):
+        self.message = f"Invalid time"
+        super().__init__(self.message)

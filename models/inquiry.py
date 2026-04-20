@@ -1,6 +1,6 @@
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from .urgency_level import UrgencyLevel
 from .inquiry_status import InquiryStatus
 from errors import queue_error as q
@@ -43,7 +43,17 @@ class Inquiry(Attributes):
         self.__submitted_at = submitted_at # "%Y-%m-%d %H:%M:%S"
         self.__status = status
         self.__claimed_by = claimed_by if claimed_by else 'N/A' #Tutor's name
-
+        value = self.__urgency
+        def check_deadline(value):
+            if value == 1:
+                return timedelta(hours=24)
+            elif value == 2:
+                return timedelta(hours=48)
+            elif value == 3:
+                return timedelta(hours=72)
+            else:
+                return timedelta(hours=96)
+        self.__deadline = check_deadline(value)
 #define getters and setters before anything else
     
     #no setter
@@ -102,7 +112,9 @@ class Inquiry(Attributes):
     @urgency.setter
     def urgency(self, value):
         if not isinstance(value, UrgencyLevel):
-            raise q.InvalidUrgencyError()
+            if value not in {1, 2, 3, 4}:
+                raise q.InvalidUrgencyError()
+            value = UrgencyLevel.return_urgency(value)
         self.__urgency = value
     
     # add setter for submitted_at -> in case of changes
@@ -124,7 +136,7 @@ class Inquiry(Attributes):
     @status.setter
     def status(self, value):
         if not isinstance(value, InquiryStatus):
-            if value not in {1, 2, 3, 4}:
+            if value not in {1, 2, 3, 4, 5}:
                 raise q.InvalidStatusError()
             value = InquiryStatus.return_status(value)
         self.__status = value
@@ -139,6 +151,22 @@ class Inquiry(Attributes):
             raise ValueError("Invalid name given!")
         self.__claimed_by = value.title()
         self.status = InquiryStatus.return_status(2) # CLAIMED
+
+    @property
+    def deadline(self):
+        return self.__deadline
+    
+    @deadline.setter
+    def deadline(self, value):
+        if not isinstance(value, timedelta):
+            raise ValueError("Value not type of datetime")
+        if self.__urgency == 1 and value > timedelta(hours=24):
+            raise q.TimeError()
+        elif self.__urgency == 2 and (value > timedelta(hours=48) or  value < timedelta(hours=24)):
+            raise q.TimeError()
+        elif self.__urgency in (3, 4) and (value < timedelta(hours=48)):
+            raise q.TimeError()
+        self.__deadline = value
     
     # Methods
     def verify_subject(self, grade):
@@ -177,6 +205,28 @@ class Inquiry(Attributes):
         current = datetime.now()
         return current - self.__submitted_at # only do calculations with objects
     
+    def change_urgency(self):
+        wait = self.wait_time()
+        if wait <= timedelta(hours=24):
+            self.urgency = 1
+            self.deadline = timedelta(hours=24)
+        elif wait <= timedelta(hours=48):
+            self.urgency = 2
+            self.deadline = timedelta(hours=48)
+        elif wait <= timedelta(hours=72):
+            self.urgency = 3
+            self.deadline = timedelta(hours=72)
+        elif wait <= timedelta(hours=96):
+            self.urgency = 4
+            self.deadline = timedelta(hours=96)
+        self.change_deadline()
+
+    def change_deadline(self):
+        wait = self.wait_time()
+        print(self.deadline , wait)
+        if self.deadline < wait and self.__status != 3:
+            self.status = 5
+
     # Finish implementing __lt__ method
     def __lt__(self, other):
         if self.__urgency.value != other.__urgency.value:
@@ -194,6 +244,7 @@ Urgency: {self.__urgency.name}
 Submitted At: {self.__submitted_at}
 Status: {self.__status.name}
 Claimed By: {self.__claimed_by}
+Deadline: {self.__deadline}
 =================================================
 """
     
