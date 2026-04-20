@@ -32,9 +32,20 @@ inquiries[3].cancelled()
 for i in inquiries: 
     queue.enqueue(i)
 
-queue.dequeue()
+
 lst = queue.list_pending()
 for l in lst:
     print(l)
 
+data = inquiries[0].to_dict()
+print(data)
+f = models.Inquiry.from_dict(data)
 
+print(inquiries[0], '*'*90, sep='\n')
+print(type(f.submitted_at))
+print(f.deadline)
+print(queue.peek())
+print(queue.size())
+queue.save()
+queue.load()
+print(queue.heap)

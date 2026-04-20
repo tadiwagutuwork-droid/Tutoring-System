@@ -42,7 +42,7 @@ class Inquiry(Attributes):
         self.__urgency = urgency 
         self.__submitted_at = submitted_at # "%Y-%m-%d %H:%M:%S"
         self.__status = status
-        self.__claimed_by = claimed_by if claimed_by else 'N/A' #Tutor's name
+        self.__claimed_by = claimed_by if isinstance(claimed_by, str) else 'N/A' #Tutor's name
         value = self.__urgency
         def check_deadline(value):
             if value == 1:
@@ -196,7 +196,7 @@ class Inquiry(Attributes):
     @classmethod
     def from_dict(cls, data):
         # remember the cls instances
-        claimed_by = data['Claimed By'] != 'N/A'
+        claimed_by = data['Claimed By'] if data['Claimed By'] != 'N/A' else False
         return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Description'], UrgencyLevel.return_urgency(data['Urgency']), datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), claimed_by, data['Inquiry ID'], InquiryStatus.return_status(data['Status']))
         
     def wait_time(self):
