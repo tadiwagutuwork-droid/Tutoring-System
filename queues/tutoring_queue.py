@@ -13,6 +13,8 @@ class TutoringQueue:
 
     @property
     def heap(self):
+        if not self.__heap:
+            return "Heap is empty"
         return self.__heap
 
     @heap.setter
@@ -23,6 +25,8 @@ class TutoringQueue:
 
     @property
     def history(self):
+        if not self.__history:
+            return "History is empty"
         return self.__history
 
     def verify_object(self, value):
@@ -36,14 +40,18 @@ class TutoringQueue:
     def is_empty_history(self):
         if not self.__history:
             raise q.HistoryQueueEmptyError()
+        
     def enqueue(self, value):
         self.verify_object(value)
         heapq.heappush(self.__heap, value)
-        heapq.heappush(self.__history, value)
     
     def dequeue(self):
         self.is_empty()
-        heapq.heappop(self.__heap)
+        value = heapq.heappop(self.__heap)
+
+        if value.status in (1, 2):
+            raise q.StatusHistoryError()
+        heapq.heappush(self.__history, value)
     
     def peek(self):
         self.is_empty()

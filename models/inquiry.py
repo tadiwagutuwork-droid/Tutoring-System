@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 from .urgency_level import UrgencyLevel
 from .inquiry_status import InquiryStatus
+from errors import queue_error as q
 
 # # 1. Get current time
 # now = datetime.now()
@@ -101,7 +102,7 @@ class Inquiry(Attributes):
     @urgency.setter
     def urgency(self, value):
         if not isinstance(value, UrgencyLevel):
-            raise ValueError("Invalid instance of urgency provided!")
+            raise q.InvalidUrgencyError()
         self.__urgency = value
     
     # add setter for submitted_at -> in case of changes
@@ -120,11 +121,13 @@ class Inquiry(Attributes):
     def status(self):
         return self.__status
     
-    # @status.setter
-    # def status(self, value):
-    #     if not isinstance(value, InquiryStatus):
-    #         raise ValueError("Invalid instance of status provided!")
-    #     self.__status = value
+    @status.setter
+    def status(self, value):
+        if not isinstance(value, InquiryStatus):
+            if value not in {1, 2, 3, 4}:
+                raise q.InvalidStatusError()
+            value = InquiryStatus.return_status(value)
+        self.__status = value
         
     @property
     def claimed_by(self):
@@ -135,6 +138,7 @@ class Inquiry(Attributes):
         if not isinstance(value, str):
             raise ValueError("Invalid name given!")
         self.__claimed_by = value.title()
+        self.status = InquiryStatus.return_status(2) # CLAIMED
     
     # Methods
     def verify_subject(self, grade):

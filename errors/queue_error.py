@@ -1,5 +1,5 @@
 class QueueError(Exception):
-    def __init__(self):
+    def __init__(self, message='Queue Error'):
         pass
 
 class EmptyQueueError(QueueError):
@@ -40,4 +40,9 @@ class WrongInstanceError(QueueError):
 class WrongHeapError(QueueError):
     def __init__(self):
         self.message = f"Invalid instance of heap"
+        super().__init__(self.message)
+
+class StatusHistoryError(QueueError):
+    def __init__(self):
+        self.message = f"Invalid status of inquiry in history"
         super().__init__(self.message)
