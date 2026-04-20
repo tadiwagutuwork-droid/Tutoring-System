@@ -226,11 +226,14 @@ class Inquiry(Attributes):
         if self.deadline < wait and self.__status != 3:
             self.status = 5
 
+    def resolved(self):
+        self.status = 3
+
     # Finish implementing __lt__ method
     def __lt__(self, other):
-        if self.__urgency != other.__urgency:
-            return self.__urgency < other.__urgency
-        return self.__submitted_at < other.__submitted_at
+        if self.__urgency == other.__urgency:
+            return self.__submitted_at < other.__submitted_at
+        return self.__urgency < other.__urgency
     
     def __str__(self):
         return f"""
