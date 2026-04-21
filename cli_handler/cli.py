@@ -6,7 +6,29 @@ import errors as err
 from datetime import datetime, timedelta
 
 def run():
-    pass
+# ╔══════════════════════════════════════╗
+# ║         TUTORING QUEUE SYSTEM        ║
+# ╠══════════════════════════════════════╣
+# ║  [1]  Submit new inquiry             ║
+# ║  [2]  View pending queue             ║
+# ║  [3]  Claim next inquiry             ║
+# ║  [4]  Cancel an inquiry              ║
+# ║  [5]  Quit                           ║
+# ╚══════════════════════════════════════╝
+    while True:
+        option = int(input(f'{show_menu()}\nSelect option:'))
+        if option not in set(range(1, 6)):
+            raise ValueError("Invalid option selected")
+        elif option == 1:
+            pass
+        elif option == 2:
+            pass
+        elif option == 3:
+            pass
+        elif option == 4:
+            pass
+        else:
+            pass
 
 def prompt_new_inquiry():
     name = prompt_name()
@@ -71,15 +93,14 @@ def prompt_urgency():
         raise err.queue_error.ChoiceError()
     return md.UrgencyLevel(choice)
 
-def display_queue():
-    # return pending 
-    pass
+def display_queue(queue):
+    print(handle_view(queue))
 
 def display_inquiry(instance):
     print(instance)
 
 def confirm(instance):
-    choice = input("Confirm inquiry (Y/N):").upper()
+    choice = input(f"{instance.peek()}\nConfirm inquiry (Y/N):").upper()
     if choice not in {'Y', 'N'}:
         raise ValueError('Invalid error option')
     return choice == 'Y'
@@ -101,11 +122,43 @@ def handle_submit(instance):
     instance.enqueue(prompt_new_inquiry())
 
 def handle_claim(instance):
-    tutor_name = input("Enter tutor's name:")
+    tutor_name = input("Enter tutor's name:").strip().title()
+    if confirm():
+        instance.claimed_by = tutor_name
+    else:
+        print("INQUIRY NOT HANDLED")
 
-def handle_cancel(instance):
-    pass
+def handle_cancel(instance, queue):
+    inquiry = get_name_queue()
+    inquiry.cancelled()
+    queue.cancelled_set()
 
 def handle_view(queue):
-    pass
+    lst = queue.list_pending()
+    widths = {
+    'Inquiry ID': 12,
+    'Learner Name': 18,
+    'Grade': 8,
+    'Subject': 12,
+    'Urgency': 10,
+    'Status': 10,
+    'Claimed By': 15
+}
+    header = "".join([f"{key:<{widths[key]}} | " for key in widths])
+    separator = "-" * (sum(widths.values()) + (len(widths) * 3))
+    row_strings = []
+    for item in lst:
+        item = item.to_dict()
+        row = "".join([f"{str(item.get(key, '')):<{widths[key]}} | " for key in widths])
+        row_strings.append(row)
+
+    final_table = f"{header}\n{separator}\n" + "\n".join(row_strings)
+    return final_table
+
+def get_name_queue(instance):
+    name = prompt_name()
+    inquiry = instance.get_instance(name)
+    return inquiry
+
+
 

@@ -8,14 +8,14 @@ class TutoringQueue:
     def __init__(self):
         self.__heap = list() # empty queue
         self.__history = list() # list of past inquiries
+        self.__cancelled = set()
         # use this format to ensure FIFO (Urgency Level, Datetime Object, Inquiry Object)
     # implement the methods 
 
     @property
     def heap(self):
-        if not self.__heap:
-            return "Heap is empty"
-        return self.__heap
+        self.is_empty()
+        return self.__heap.copy()
 
     @heap.setter
     def heap(self, value):
@@ -24,10 +24,21 @@ class TutoringQueue:
         self.__heap = value
 
     @property
+    def cancelled(self):
+        if not self.__cancelled:
+            return "Heap is empty"
+        return self.__cancelled
+
+    @heap.setter
+    def cancelled(self, value):
+        if not isinstance(value, list):
+            raise q.WrongHeapError()
+        self.__cancelled = value
+
+    @property
     def history(self):
-        if not self.__history:
-            return "History is empty"
-        return self.__history
+        self.is_empty_history()
+        return self.__history.copy()
 
     def verify_object(self, value):
         if not isinstance(value, models.Inquiry):
@@ -43,33 +54,36 @@ class TutoringQueue:
         
     def enqueue(self, value):
         self.verify_object(value)
-        heapq.heappush(self.__heap, value)
+        heapq.heappush(self.heap, value)
     
     def dequeue(self):
         self.is_empty()
-        value = heapq.heappop(self.__heap)
+        value = heapq.heappop(self.heap)
 
         if value.status in (1, 2):
             raise q.StatusHistoryError()
-        heapq.heappush(self.__history, value)
+        heapq.heappush(self.history, value)
     
     def peek(self):
-        self.is_empty()
-        return self.__heap[0]
+        while self.heap[0].status == 5:
+            self.cancelled_set(self.heap[0])
+            self.dequeue()
+        return self.heap[0]
     
     def size(self):
         self.is_empty()
         return len(self.__heap)
     
-    def list_pending(self):
-        self.is_empty()
-        list_copy = sorted([i for i in self.__heap if i.status == models.InquiryStatus.PENDING], key=attrgetter('urgency_level', 'submitted_at'))
+    def list_pending(self, value=False):
+        heap = self.heap
+        return_lst = list()
+        list_copy = sorted([i for i in heap if i.status == 1], key=attrgetter('urgency_level', 'submitted_at'))
         return list_copy
     
     def list_all(self):
-        self.is_empty_history()
-        return self.__history
-    
+        for h in self.history:
+            print(h, end='\n')
+
     def save(self):
         data_to_save = [item.to_dict() for item in self.__heap]
         
@@ -88,4 +102,19 @@ class TutoringQueue:
         heapq.heapify(data_to_load)
         print(f"Successfully restored {len(data_to_load)} inquiries.")
         self.heap = data_to_load
+
+    def get_instance(self, value):
+        self.is_empty()
+        for instance in self.__heap:
+            if value == instance.learner_name:
+                return instance
+        else:
+            raise ValueError("Name not Found")
+        
+    def cancelled_set(self, value):
+        if not isinstance(value, models.Inquiry) and value.status != 5:
+            raise q.WrongInstanceError()
+        self.__cancelled.add(value)
+
+
     
