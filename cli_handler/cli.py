@@ -72,13 +72,17 @@ def prompt_urgency():
     return md.UrgencyLevel(choice)
 
 def display_queue():
+    # return pending 
     pass
 
-def display_inquiry():
-    pass
+def display_inquiry(instance):
+    print(instance)
 
 def confirm(instance):
-    pass
+    choice = input("Confirm inquiry (Y/N):").upper()
+    if choice not in {'Y', 'N'}:
+        raise ValueError('Invalid error option')
+    return choice == 'Y'
 
 def show_menu():
     print("""
@@ -94,10 +98,10 @@ def show_menu():
 """)
 
 def handle_submit(instance):
-    pass
+    instance.enqueue(prompt_new_inquiry())
 
 def handle_claim(instance):
-    pass
+    tutor_name = input("Enter tutor's name:")
 
 def handle_cancel(instance):
     pass
