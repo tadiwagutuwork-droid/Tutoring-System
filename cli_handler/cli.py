@@ -11,7 +11,11 @@ def run():
     program = True
     file_path = r"C:\Users\tadvi\Tutoring-System\json_files\inquiries.json"
     with open(file_path, 'r') as f:
-        data = json.load(f)
+        data = f.read().strip()
+        if not data:
+            data = []
+        else:
+            data = json.loads(data)
     if not data:
         queue = qu.TutoringQueue()
     else:
@@ -41,6 +45,7 @@ def run():
         else:
             print("Thank you for using the Tutoring Queue program. Bye!")
             program = False
+        print(queue.heap)
         queue.save()
 
 def prompt_new_inquiry():
@@ -75,11 +80,12 @@ def prompt_subject(grade):
 ║  [3]  Geography                                      ║
 ║  [4]  Life Sciences                                  ║
 ║  [5]  Natural Sciences                               ║
+║  [6]  English                                        ║
 ╚══════════════════════════════════════════════════════╝
 """
-    option = input(f"{subject_menu}\nSelect option:")
+    option = int(input(f"{subject_menu}\nSelect option:"))
     lst = list(md.Attributes().subject_index)
-    if option not in md.Attributes().subject_index:
+    if option not in set(range(1, 7)) and lst[option-1] not in md.Attributes().subject_index:
         raise ValueError("Invalid option provided!")
     get_subject= lst[option-1]
     if grade not in md.Attributes().subject_index.get(get_subject):
@@ -119,7 +125,7 @@ def confirm(instance):
     return choice == 'Y'
 
 def show_menu():
-    print("""
+    return """
 ╔══════════════════════════════════════╗
 ║         TUTORING QUEUE SYSTEM        ║
 ╠══════════════════════════════════════╣
@@ -129,16 +135,17 @@ def show_menu():
 ║  [4]  Cancel an inquiry              ║
 ║  [5]  Quit                           ║
 ╚══════════════════════════════════════╝
-""")
+"""
 
 def handle_submit(instance):
-    instance.enqueue(prompt_new_inquiry())
+    inquiry = prompt_new_inquiry()
+    instance.enqueue(inquiry)
+    print(inquiry)
 
 def handle_claim(instance):
     tutor_name = input("Enter tutor's name:").strip().title()
-    x = instance.peek()
-    display_inquiry(x)
-    if confirm():
+    display_inquiry(instance.peek())
+    if confirm(instance):
         instance.dequeue(tutor_name)
     else:
         print("INQUIRY NOT HANDLED")
@@ -151,8 +158,8 @@ def handle_cancel(queue):
 def handle_view(queue):
     lst = queue.list_pending()
     widths = {
-    'Inquiry ID': 12,
-    'Learner Name': 18,
+    'Inquiry ID': 40,
+    'Learner Name': 25,
     'Grade': 8,
     'Subject': 12,
     'Urgency': 10,

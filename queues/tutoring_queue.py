@@ -54,15 +54,15 @@ class TutoringQueue:
         
     def enqueue(self, value):
         self.verify_object(value)
-        heapq.heappush(self.heap, value)
+        heapq.heappush(self.__heap, value)
     
     def dequeue(self, tutor='N/A'):
         self.is_empty()
-        value = heapq.heappop(self.heap)
-        if value.status in (1, 2, 5):
-            raise q.StatusHistoryError()
+        value = heapq.heappop(self.__heap)
         value.claimed_by = tutor
-        heapq.heappush(self.history, value)
+        if value.status in (1, 5):
+            raise q.StatusHistoryError()
+        heapq.heappush(self.__history, value)
     
     def peek(self):
         while self.heap[0].status == 5:
@@ -77,7 +77,7 @@ class TutoringQueue:
     def list_pending(self, value=False):
         heap = self.heap
         return_lst = list()
-        list_copy = sorted([i for i in heap if i.status == 1], key=attrgetter('urgency_level', 'submitted_at'))
+        list_copy = sorted([i for i in heap if i.status == 1], key=attrgetter('urgency', 'submitted_at'))
         return list_copy
     
     def list_all(self):
@@ -85,7 +85,7 @@ class TutoringQueue:
             print(h, end='\n')
     
     def save(self):
-        data_to_save = [item.to_dict() for item in self.__heap]
+        data_to_save = [item.to_dict() for item in self.heap]
         
         if not data_to_save:
             raise q.EmptyQueueError()

@@ -16,11 +16,12 @@ class Attributes:
     """ For O(1) searching -> faster algorithm """
     def __init__(self):
         self.__grades = {7, 8, 9, 10, 11, 12}
-        self.__subject_index = {'Mathematics': {7, 8, 9, 10, 11, 12}, 
-                                'Physical Sciences': {10, 11, 12}, 
-                                'Geography': {7, 8, 9, 10, 11, 12}, 
-                                'Life Sciences': {10, 11, 12}, 
-                                'Natural Sciences': {7, 8, 9}
+        self.__subject_index = {'Mathematics': set(range(7, 13)), 
+                                'Physical Sciences': set(range(10, 13)), 
+                                'Geography': set(range(7, 13)), 
+                                'Life Sciences': set(range(10, 13)), 
+                                'Natural Sciences': set(range(7, 10)),
+                                'English': set(range(7, 13))
                                 }
     
     @property
