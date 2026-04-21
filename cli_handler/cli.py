@@ -3,9 +3,20 @@
 import models as md
 import queues as qu
 import errors as err
+import json
 from datetime import datetime, timedelta
 
 def run():
+    queue = None
+    program = True
+    file_path = r"C:\Users\tadvi\Tutoring-System\json_files\inquiries.json"
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    if not data:
+        queue = qu.TutoringQueue()
+    else:
+        queue = qu.TutoringQueue()
+        queue.load()
 # ╔══════════════════════════════════════╗
 # ║         TUTORING QUEUE SYSTEM        ║
 # ╠══════════════════════════════════════╣
@@ -15,20 +26,22 @@ def run():
 # ║  [4]  Cancel an inquiry              ║
 # ║  [5]  Quit                           ║
 # ╚══════════════════════════════════════╝
-    while True:
+    while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
         if option not in set(range(1, 6)):
             raise ValueError("Invalid option selected")
         elif option == 1:
-            pass
+            handle_submit(queue)
         elif option == 2:
-            pass
+            display_queue(queue)
         elif option == 3:
-            pass
+            handle_claim(queue)
         elif option == 4:
-            pass
+            handle_cancel(queue)
         else:
-            pass
+            print("Thank you for using the Tutoring Queue program. Bye!")
+            program = False
+        queue.save()
 
 def prompt_new_inquiry():
     name = prompt_name()
@@ -123,15 +136,17 @@ def handle_submit(instance):
 
 def handle_claim(instance):
     tutor_name = input("Enter tutor's name:").strip().title()
+    x = instance.peek()
+    display_inquiry(x)
     if confirm():
-        instance.claimed_by = tutor_name
+        instance.dequeue(tutor_name)
     else:
         print("INQUIRY NOT HANDLED")
 
-def handle_cancel(instance, queue):
+def handle_cancel(queue):
     inquiry = get_name_queue()
     inquiry.cancelled()
-    queue.cancelled_set()
+    queue.cancelled_set(inquiry)
 
 def handle_view(queue):
     lst = queue.list_pending()

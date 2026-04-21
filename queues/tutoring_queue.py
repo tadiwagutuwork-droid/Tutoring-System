@@ -56,12 +56,12 @@ class TutoringQueue:
         self.verify_object(value)
         heapq.heappush(self.heap, value)
     
-    def dequeue(self):
+    def dequeue(self, tutor='N/A'):
         self.is_empty()
         value = heapq.heappop(self.heap)
-
-        if value.status in (1, 2):
+        if value.status in (1, 2, 5):
             raise q.StatusHistoryError()
+        value.claimed_by = tutor
         heapq.heappush(self.history, value)
     
     def peek(self):
@@ -83,17 +83,19 @@ class TutoringQueue:
     def list_all(self):
         for h in self.history:
             print(h, end='\n')
-
+    
     def save(self):
         data_to_save = [item.to_dict() for item in self.__heap]
         
         if not data_to_save:
             raise q.EmptyQueueError()
-        with open('inquiries.json', 'w') as f:
+        file_path = r"C:\Users\tadvi\Tutoring-System\json_files\inquiries.json"
+        with open(file_path, 'w') as f:
             json.dump(data_to_save, f, indent=4)
-
+    
     def load(self):
-        with open('inquiries.json', 'r') as f:
+        file_path = r"C:\Users\tadvi\Tutoring-System\json_files\inquiries.json"
+        with open(file_path, 'r') as f:
             data = json.load(f)
         
         if not data:
