@@ -21,15 +21,7 @@ def run():
     else:
         queue = qu.TutoringQueue()
         queue.load()
-# ╔══════════════════════════════════════╗
-# ║         TUTORING QUEUE SYSTEM        ║
-# ╠══════════════════════════════════════╣
-# ║  [1]  Submit new inquiry             ║
-# ║  [2]  View pending queue             ║
-# ║  [3]  Claim next inquiry             ║
-# ║  [4]  Cancel an inquiry              ║
-# ║  [5]  Quit                           ║
-# ╚══════════════════════════════════════╝
+
     while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
         if option not in set(range(1, 6)):
@@ -45,7 +37,6 @@ def run():
         else:
             print("Thank you for using the Tutoring Queue program. Bye!")
             program = False
-        print(queue.heap)
         queue.save()
 
 def prompt_new_inquiry():
@@ -151,17 +142,19 @@ def handle_claim(instance):
         print("INQUIRY NOT HANDLED")
 
 def handle_cancel(queue):
-    inquiry = get_name_queue()
+    inquiry = get_name_queue(queue)
     inquiry.cancelled()
     queue.cancelled_set(inquiry)
 
 def handle_view(queue):
     lst = queue.list_pending()
+    if not lst:
+        raise err.queue_error.EmptyQueueError()
     widths = {
     'Inquiry ID': 40,
     'Learner Name': 25,
     'Grade': 8,
-    'Subject': 12,
+    'Subject': 20,
     'Urgency': 10,
     'Status': 10,
     'Claimed By': 15
@@ -170,8 +163,10 @@ def handle_view(queue):
     separator = "-" * (sum(widths.values()) + (len(widths) * 3))
     row_strings = []
     for item in lst:
-        item = item.to_dict()
-        row = "".join([f"{str(item.get(key, '')):<{widths[key]}} | " for key in widths])
+        item_dict = item.to_dict()
+        item_dict['Urgency'] = item.urgency.name
+        item_dict['Status'] = item.status.name
+        row = "".join([f"{str(item_dict.get(key, '')):<{widths[key]}} | " for key in widths])
         row_strings.append(row)
 
     final_table = f"{header}\n{separator}\n" + "\n".join(row_strings)
