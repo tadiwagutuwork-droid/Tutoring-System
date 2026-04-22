@@ -162,6 +162,15 @@ class TutoringQueue:
     def save_resolved(self):
         pass
 
+    def load_cancelled(self):
+        pass
+
+    def load_history(self):
+        pass
+
+    def load_resolved(self):
+        pass
+
 
 
     
