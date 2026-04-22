@@ -47,6 +47,16 @@ class TutoringQueue:
             raise q.WrongHeapError()
         self.__history = value
 
+    @property
+    def resolved(self):
+        return self.__resolved.copy()
+    
+    @resolved.setter
+    def resolved(self, value):
+        if not isinstance(value, list):
+            raise q.WrongHeapError()
+        self.__resolved = value
+
     def verify_object(self, value):
         if not isinstance(value, models.Inquiry):
             raise q.WrongInstanceError('Inquiry')
@@ -142,6 +152,16 @@ class TutoringQueue:
         if not isinstance(value, models.Inquiry) and value.status != 5:
             raise q.WrongInstanceError()
         self.__cancelled.add(value)
+
+    def save_cancelled(self):
+        pass
+
+    def save_history(self):
+        pass
+
+    def save_resolved(self):
+        pass
+
 
 
     
