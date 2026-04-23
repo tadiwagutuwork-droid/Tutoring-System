@@ -33,7 +33,7 @@ class Attributes:
         return self.__subject_index
 
 class Inquiry(Attributes):
-    def __init__(self, name, grade, subject, description, urgency, submitted_at, claimed_by=False, inquiry_id=str(uuid.uuid4()), status=InquiryStatus.return_status(1)):
+    def __init__(self, name, grade, subject, description, urgency, submitted_at, claimed_by=False, inquiry_id=str(uuid.uuid4()), status=InquiryStatus(1)):
         super().__init__()
         self.__inquiry_id = inquiry_id
         self.__learner_name = name
@@ -187,9 +187,9 @@ class Inquiry(Attributes):
             'Grade': self.__grade, 
             'Subject': self.__subject,
             'Description': self.__description, 
-            'Urgency': self.__urgency, 
+            'Urgency': self.__urgency.value, 
             'Submitted At': self.__submitted_at.strftime("%Y-%m-%d %H:%M:%S"), # it is a string not an object
-            'Status': self.__status, 
+            'Status': self.__status.value, 
             #*****************************************
             'Claimed By': self.__claimed_by
         }
