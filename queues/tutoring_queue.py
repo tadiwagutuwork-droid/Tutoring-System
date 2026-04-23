@@ -1,5 +1,6 @@
 from operator import attrgetter
 from errors import queue_error as q
+from pathlib import Path
 import heapq
 import models
 import json
@@ -8,8 +9,8 @@ class TutoringQueue:
     def __init__(self):
         self.__heap = list() # empty queue
         self.__history = list() # list of past inquiries
-        self.__cancelled = set()
-        self.__claimed = set() # to handle resolved
+        self.__cancelled = list()
+        self.__claimed = list() # to handle resolved
         # use this format to ensure FIFO (Urgency Level, Datetime Object, Inquiry Object)
     # implement the methods 
 
@@ -48,14 +49,14 @@ class TutoringQueue:
         self.__history = value
 
     @property
-    def resolved(self):
-        return self.__resolved.copy()
+    def claimed(self):
+        return self.__claimed.copy()
     
-    @resolved.setter
-    def resolved(self, value):
+    @claimed.setter
+    def claimed(self, value):
         if not isinstance(value, list):
             raise q.WrongHeapError()
-        self.__resolved = value
+        self.__claimed = value
 
     def verify_object(self, value):
         if not isinstance(value, models.Inquiry):
@@ -74,15 +75,20 @@ class TutoringQueue:
         heapq.heappush(self.__heap, value)
     
     def dequeue(self, tutor='N/A'):
-        value = heapq.heappop(self.heap)
+        value = heapq.heappop(self.__heap)
+        print(self.__heap)
         value.claimed_by = tutor
         if value.status == 1:
             raise q.StatusHistoryError()
-        heapq.heappush(self.__history, value)
-    
+        if tutor != 'N/A' and value.status == 2:
+            self.__claimed.append(value)
+        else:
+            heapq.heappush(self.__history, value)
+
     def peek(self):
-        while self.heap[0].status == 5:
-            self.cancelled_set(self.heap[0])
+        while self.heap[0].status in (4, 5):
+            if self.heap[0].status == 4:
+                self.cancelled_set(self.heap[0])
             self.dequeue()
         return self.heap[0]
     
@@ -98,47 +104,6 @@ class TutoringQueue:
     def list_all(self):
         for h in self.history:
             print(h, end='\n')
-    
-    def save(self):
-        data_to_save = [item.to_dict() for item in self.heap if item.status != 5]
-        history_to_save = [item.to_dict() for item in self.history]
-        skip = False
-        if not data_to_save:
-            raise q.EmptyQueueError()
-        elif not history_to_save:
-            skip = True
-        file_path = r"C:\Users\tadvi\Tutoring-System\json_files\inquiries.json"
-        with open(file_path, 'w') as f:
-            json.dump(data_to_save, f, indent=4)
-        if not skip:
-            history_path = r"C:\Users\tadvi\Tutoring-System\json_files\history.json"
-            with open(file_path, 'w') as f:
-                json.dump(data_to_save, f, indent=4)
-
-    def load(self):
-        file_path = r"C:\Users\tadvi\Tutoring-System\json_files\inquiries.json"
-        with open(file_path, 'r') as f:
-            data = json.load(f)
-        
-        history_path = r"C:\Users\tadvi\Tutoring-System\json_files\history.json"
-        with open(file_path, 'r') as f:
-            history = f.read().strip()
-            if not history:
-                history = []
-            else:
-                history = json.loads(history)
-        
-        if history:
-            history_to_load = [models.Inquiry.from_dict(item) for item in history]
-            print(f"Successfully restored {len(history_to_load)} inquiries.")
-            self.history = history_to_load
-
-        if not data:
-            raise q.JSONFileEmptyError()
-        data_to_load = [models.Inquiry.from_dict(item) for item in data]
-        heapq.heapify(data_to_load)
-        print(f"Successfully restored {len(data_to_load)} inquiries.")
-        self.heap = data_to_load
 
     def get_instance(self, value):
         self.is_empty()
@@ -147,29 +112,127 @@ class TutoringQueue:
                 return instance
         else:
             raise ValueError("Name not Found")
-        
+
     def cancelled_set(self, value):
         if not isinstance(value, models.Inquiry) and value.status != 5:
             raise q.WrongInstanceError()
-        self.__cancelled.add(value)
+        self.__cancelled.append(value) 
 
+    def resolve_inquiry(self, value):
+        if value in self.claimed:
+            self.claimed.discard(value)
+            heapq.heappush(self.__history, value)
+
+    def save(self):
+        file_path = Path(__name__).parent.parent / "json_files" / "inquiries.json"
+        if self.__heap:
+            data_to_save = [item.to_dict() for item in self.heap if item.status not in (2, 4, 5)]
+            with open(file_path, 'w') as f:
+                json.dump(data_to_save, f, indent=4)
+        else:
+            with open(file_path, 'w') as f:
+                pass
+        self.save_cancelled()
+        self.save_claimed()
+        self.save_history()
+
+    def load(self):
+        file_path = Path(__name__).parent.parent / "json_files" / "inquiries.json"
+        load = []
+        with open(file_path, 'r') as f:
+            data = f.read().strip()
+            if data:
+                load = json.loads(data)
+        
+        if load:
+            heap_to_load = [models.Inquiry.from_dict(item) for item in load]
+            heapq.heapify(heap_to_load)
+            print(f"Successfully restored {len(heap_to_load)} inquiries.")
+            self.heap = heap_to_load
+        self.load_cancelled()
+        self.load_claimed()
+        self.load_history()
+        
     def save_cancelled(self):
-        pass
+        cancelled_path = Path(__name__).parent.parent / "json_files" / "cancelled.json"
+        if self.__cancelled:
+            cancelled_to_save = [item.to_dict() for item in self.cancelled]
+            with open(cancelled_path, 'w') as f:
+                json.dump(cancelled_to_save, f, indent=4)
+        else:
+            with open(cancelled_path, 'w') as f:
+                pass
 
     def save_history(self):
-        pass
+        history_path = Path(__name__).parent.parent / "json_files" / "history.json"
+        if self.__history:
+            history_to_save = [item.to_dict() for item in self.history]
+            with open(history_path, 'w') as f:
+                json.dump(history_to_save, f, indent=4)
+        else:
+            with open(history_path, 'w') as f:
+                pass
 
-    def save_resolved(self):
-        pass
+    def save_claimed(self):
+        claimed_path = Path(__name__).parent.parent / "json_files" / "claimed.json"
+        if self.__claimed:
+            claimed_to_save = [item.to_dict() for item in self.claimed]
+            with open(claimed_path, 'w') as f:
+                json.dump(claimed_to_save, f, indent=4)
+        else:
+            with open(claimed_path, 'w') as f:
+                pass
 
     def load_cancelled(self):
-        pass
+        cancelled_path = Path(__name__).parent.parent / "json_files" / "cancelled.json"
+        load = []
+        with open(cancelled_path, 'r')as f:
+            data = f.read().strip()
+            if data:
+                load = json.loads(data)
+        
+        if load:
+            cancelled_to_load = [models.Inquiry.from_dict(item) for item in load]
+            print(f"Successfully restored {len(cancelled_to_load)} cancelled inquiries.")
+            self.cancelled = cancelled_to_load
 
     def load_history(self):
-        pass
+        history_path = Path(__name__).parent.parent / "json_files" / "history.json"
+        load = []
+        with open(history_path, 'r')as f:
+            data = f.read().strip()
+            if data:
+                load = json.loads(data)
+        
+        if load:
+            history_to_load = [models.Inquiry.from_dict(item) for item in load]
+            print(f"Successfully restored {len(history_to_load)} history inquiries.")
+            self.history = history_to_load
 
-    def load_resolved(self):
-        pass
+    def load_claimed(self):
+        claimed_path = Path(__name__).parent.parent / "json_files" / "claimed.json"
+        load = []
+        with open(claimed_path, 'r')as f:
+            data = f.read().strip()
+            if data:
+                load = json.loads(data)
+        
+        if load:
+            claimed_to_load = [models.Inquiry.from_dict(item) for item in load]
+            print(f"Successfully restored {len(claimed_to_load)} claimed inquiries.")
+            self.claimed = claimed_to_load
+    
+    def clear_json_files(self):
+        with open(Path(__name__).parent.parent / "json_files" / "inquiries.json", 'w') as f:
+            pass
+        with open(Path(__name__).parent.parent / "json_files" / "history.json", 'w') as f:
+            pass
+        with open(Path(__name__).parent.parent / "json_files" / "claimed.json", 'w') as f:
+            pass
+        with open(Path(__name__).parent.parent / "json_files" / "cancelled.json", 'w') as f:
+            pass
+
+
 
 
 

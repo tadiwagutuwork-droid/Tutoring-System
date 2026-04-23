@@ -7,20 +7,9 @@ import json
 from datetime import datetime, timedelta
 
 def run():
-    queue = None
     program = True
-    file_path = r"C:\Users\tadvi\Tutoring-System\json_files\inquiries.json"
-    with open(file_path, 'r') as f:
-        data = f.read().strip()
-        if not data:
-            data = []
-        else:
-            data = json.loads(data)
-    if not data:
-        queue = qu.TutoringQueue()
-    else:
-        queue = qu.TutoringQueue()
-        queue.load()
+    queue = qu.TutoringQueue()
+    queue.load()
 
     while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
@@ -131,7 +120,6 @@ def show_menu():
 def handle_submit(instance):
     inquiry = prompt_new_inquiry()
     instance.enqueue(inquiry)
-    print(inquiry)
 
 def handle_claim(instance):
     tutor_name = input("Enter tutor's name:").strip().title()
