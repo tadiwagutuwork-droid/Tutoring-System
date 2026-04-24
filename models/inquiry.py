@@ -196,7 +196,7 @@ class Inquiry(Attributes):
         if subject.title() not in self.subject_index:
             raise ValueError(f"{subject.title()} not found in subjects of grade!")
         
-    def to_dict(self):
+    def to_database(self):
         return {
             'Inquiry ID': self.__inquiry_id, 
             'Reference Code': self.__reference_code,
@@ -212,10 +212,10 @@ class Inquiry(Attributes):
         }
     
     @classmethod
-    def from_dict(cls, data):
+    def from_database(cls, data):
         # remember the cls instances
-        claimed_by = data['Claimed By'] if data['Claimed By'] != 'N/A' else False
-        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Description'], UrgencyLevel.return_urgency(data['Urgency']), datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), claimed_by, data['Inquiry ID'], InquiryStatus.return_status(data['Status']), data['Reference Code'])
+        claimed_by = data[9] if data[9] != 'N/A' else False
+        return cls(data[2], data[3], data[4], data[5], UrgencyLevel.return_urgency(data[6]), datetime.strptime(data[7], "%Y-%m-%d %H:%M:%S"), claimed_by, data[0], InquiryStatus.return_status(data[8]), data[1])
         
     def wait_time(self):
         """Returns how long the inquiry has been in the queue"""
@@ -243,11 +243,6 @@ class Inquiry(Attributes):
         print(self.deadline , wait)
         if self.deadline < wait and self.__status != 3:
             self.status = 5
-
-    def resolved(self):
-        if self.__claimed_by == 'N/A':
-            raise q.StatusEditorError()
-        self.status = 3
 
     def cancelled(self):
         self.status = 5

@@ -7,30 +7,29 @@ from database import DatabaseManager
 import json
 from datetime import datetime, timedelta
 
-# UPDATE HANDLERS WITH DATABASE
+# ADD RESOLVE SUBMENU - USE CLAIMED TABLE IN DATABASE
 def run():
     program = True
     queue = qu.TutoringQueue()
-    queue.load()
     db = DatabaseManager()
+    db.load_database_heap(queue)
+    db.load_database_history(queue)
 
     while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
         if option not in set(range(1, 6)):
             raise ValueError("Invalid option selected")
         elif option == 1:
-            handle_submit(queue)
+            handle_submit(queue, db)
         elif option == 2:
-            display_queue(queue)
+            display_queue(queue, db)
         elif option == 3:
-            handle_claim(queue)
+            handle_claim(queue, db)
         elif option == 4:
-            handle_cancel(queue)
+            handle_cancel(queue, db)
         else:
             print("Thank you for using the Tutoring Queue program. Bye!")
             program = False
-        queue.save()
-    
     db.close_connection()
 
 def prompt_new_inquiry():
@@ -97,7 +96,7 @@ def prompt_urgency():
         raise err.queue_error.ChoiceError()
     return md.UrgencyLevel(choice)
 
-def display_queue(queue):
+def display_queue(queue, db):
     print(handle_view(queue))
 
 def display_inquiry(instance):
@@ -122,24 +121,26 @@ def show_menu():
 ╚══════════════════════════════════════╝
 """
 
-def handle_submit(instance):
+def handle_submit(instance, db):
     inquiry = prompt_new_inquiry()
+    db.add_inquiry(inquiry)
     instance.enqueue(inquiry)
 
-def handle_claim(instance):
+def handle_claim(instance, db):
     tutor_name = input("Enter tutor's name:").strip().title()
-    display_inquiry(instance.peek())
+    display_inquiry(instance.peek(db))
     if confirm(instance):
-        instance.dequeue(tutor_name)
+        inquiry = instance.dequeue(db, tutor_name)
+        db.add_claimed(inquiry)
     else:
         print("INQUIRY NOT HANDLED")
 
-def handle_cancel(queue):
-    inquiry = get_name_queue(queue)
+def handle_cancel(queue, db):
+    inquiry = get_inquiry(db)
     inquiry.cancelled()
-    queue.cancelled_set(inquiry)
+    db.update_inquiry(inquiry, 'inquiries')
 
-def handle_view(queue):
+def handle_view(queue, db):
     lst = queue.list_pending()
     if not lst:
         raise err.queue_error.EmptyQueueError()
@@ -156,7 +157,7 @@ def handle_view(queue):
     separator = "-" * (sum(widths.values()) + (len(widths) * 3))
     row_strings = []
     for item in lst:
-        item_dict = item.to_dict()
+        item_dict = item.to_database()
         item_dict['Urgency'] = item.urgency.name
         item_dict['Status'] = item.status.name
         row = "".join([f"{str(item_dict.get(key, '')):<{widths[key]}} | " for key in widths])
@@ -165,9 +166,11 @@ def handle_view(queue):
     final_table = f"{header}\n{separator}\n" + "\n".join(row_strings)
     return final_table
 
-def get_name_queue(instance):
-    name = prompt_name()
-    inquiry = instance.get_instance(name)
+def get_inquiry(db):
+    code = input("Enter reference code: ").upper()
+    if code[0] != 'Q' or len(code) != 10:
+        raise ValueError("Invalid code entered")
+    inquiry = db.search_inquiry(code, 'inquiries')
     return inquiry
 
 
