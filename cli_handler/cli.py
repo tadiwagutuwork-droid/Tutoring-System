@@ -3,13 +3,16 @@
 import models as md
 import queues as qu
 import errors as err
+from database import DatabaseManager
 import json
 from datetime import datetime, timedelta
 
+# UPDATE HANDLERS WITH DATABASE
 def run():
     program = True
     queue = qu.TutoringQueue()
     queue.load()
+    db = DatabaseManager()
 
     while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
@@ -27,6 +30,8 @@ def run():
             print("Thank you for using the Tutoring Queue program. Bye!")
             program = False
         queue.save()
+    
+    db.close_connection()
 
 def prompt_new_inquiry():
     name = prompt_name()

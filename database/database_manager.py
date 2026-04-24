@@ -6,9 +6,12 @@ class DatabaseMananger:
         self.cursor = self.conn.cursor()
         self.setup()
     
+    def close_connection(self):
+        self.conn.close()
+    
     def setup(self):
         self.cursor.execute("""
-CREATE TABLE  IF NOT EXISTS inquiries (
+CREATE TABLE IF NOT EXISTS inquiries (
         inquiry_id TEXT PRIMARY KEY,
         reference_code TEXT,
         learner_name TEXT,
@@ -43,7 +46,6 @@ CREATE TABLE  IF NOT EXISTS inquiries (
             row['Claimed By']
         ))
         self.conn.commit()
-        self.conn.close()
 
     def search_inquiry(self, inquiry):
         self.cursor("SELECT * FROM inquiries WHERE reference_code = ?", (inquiry.reference_code,))
@@ -101,4 +103,3 @@ WHERE reference_code = ?
     def delete_inquiry(self, inquiry):
         self.cursor.execute("DELETE FROM inquiries WHERE reference_code = ?", (inquiry.reference_code,))
         self.conn.commit()
-        self.conn.close()
