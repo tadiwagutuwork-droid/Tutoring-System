@@ -68,7 +68,7 @@ def prompt_subject(grade):
     if option not in set(range(1, 7)) and lst[option-1] not in md.Attributes().subject_index:
         raise ValueError("Invalid option provided!")
     get_subject= lst[option-1]
-    if grade not in md.Attributes().subject_index.get(get_subject):
+    if grade not in md.Attributes().subject_index.get(get_subject)[0]:
         raise ValueError('No grade in subject!')
     return get_subject
     

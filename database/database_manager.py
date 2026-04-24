@@ -4,11 +4,13 @@ class DatabaseMananger:
     def __init__(self):
         self.conn = sqlite3.connect("tutoring_system.db")
         self.cursor = self.conn.cursor()
+        self.setup()
     
     def setup(self):
         self.cursor.execute("""
-CREATE TABLE inquiries (
+CREATE TABLE  IF NOT EXISTS inquiries (
         inquiry_id TEXT PRIMARY KEY,
+        reference_code TEXT,
         learner_name TEXT,
         grade INTEGER,
         subject TEXT,
@@ -25,11 +27,12 @@ CREATE TABLE inquiries (
         row = inquiry.to_dict()
         self.cursor.execute("""
         INSERT INTO inquiries (
-            inquiry_id, learner_name, grade, subject, 
+            inquiry_id, reference_code, learner_name, grade, subject, 
             description, urgency, submitted_at, status, claimed_by
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", (
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", (
             row['Inquiry ID'],
+            row['Reference Code'],
             row['Learner Name'],
             row['Grade'],
             row['Subject'],
@@ -42,23 +45,60 @@ CREATE TABLE inquiries (
         self.conn.commit()
         self.conn.close()
 
-    def search_inquiry(self):
-        # Update IDs to be more simple like QMATH0001 - to make things easier
-        id = input("Enter inquiry ID: ")
-        self.cursor("SELECT * FROM inquiries WHERE inquiry_id = ?", (id,))
+    def search_inquiry(self, inquiry):
+        self.cursor("SELECT * FROM inquiries WHERE reference_code = ?", (inquiry.reference_code,))
         row = self.cursor.fetchone()
         self.conn.close()
     
     def update_inquiry(self, inquiry):
         # enter what you want to update into variables to write in
-        self.cursor("""
+        fields = [
+    "inquiry_id", 
+    "reference_code", 
+    "learner_name", 
+    "grade", 
+    "subject", 
+    "description", 
+    "urgency", 
+    "submitted_at", 
+    "status", 
+    "claimed_by"
+]
+        getter_list = [
+    lambda: inquiry.inquiry_id,
+    lambda: inquiry.reference_code,
+    lambda: inquiry.learner_name,
+    lambda: inquiry.grade,
+    lambda: inquiry.subject,
+    lambda: inquiry.description,
+    lambda: inquiry.urgency.value,
+    lambda: inquiry.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
+    lambda: inquiry.status.value,
+    lambda: inquiry.claimed_by
+]
+        menu = """
+-----------------------------------------
+      EDIT INQUIRY FIELD OPTIONS
+-----------------------------------------
+ 1. Inquiry ID        6. Description
+ 2. Reference Code    7. Urgency
+ 3. Learner Name      8. Submitted At
+ 4. Grade             9. Status
+ 5. Subject          10. Claimed By
+-----------------------------------------
+"""
+        option = int(input(f"{menu}\nEnter field to change: "))
+        if option not in set(range(1, 11)):
+            raise ValueError("Valid innput is between 1-10")
+        field_to_change = fields[option-1]
+        self.cursor.execute(f"""
 UPDATE inquiries
-SET grade = ?
-WHERE name = ?
-""", (12, 'Tadiwa'))
+SET {field_to_change} = ?
+WHERE reference_code = ?
+""", (getter_list[option-1](), inquiry.reference_code))
         self.conn.commit()
     
-    def delete_inquiry(self):
-        self.cursor.execute("DELETE FROM inquiries WHERE name = ?", ("Tadiwa",))
+    def delete_inquiry(self, inquiry):
+        self.cursor.execute("DELETE FROM inquiries WHERE reference_code = ?", (inquiry.reference_code,))
         self.conn.commit()
         self.conn.close()

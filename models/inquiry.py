@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from .urgency_level import UrgencyLevel
 from .inquiry_status import InquiryStatus
 from errors import queue_error as q
+from pathlib import Path
 
 # # 1. Get current time
 # now = datetime.now()
@@ -16,12 +17,12 @@ class Attributes:
     """ For O(1) searching -> faster algorithm """
     def __init__(self):
         self.__grades = {7, 8, 9, 10, 11, 12}
-        self.__subject_index = {'Mathematics': set(range(7, 13)), 
-                                'Physical Sciences': set(range(10, 13)), 
-                                'Geography': set(range(7, 13)), 
-                                'Life Sciences': set(range(10, 13)), 
-                                'Natural Sciences': set(range(7, 10)),
-                                'English': set(range(7, 13))
+        self.__subject_index = {'Mathematics': [set(range(7, 13)), 'QMATH'], 
+                                'Physical Sciences': [set(range(10, 13)), 'QPHYS'], 
+                                'Geography': [set(range(7, 13))], 
+                                'Life Sciences': [set(range(10, 13)), 'QLFSC'], 
+                                'Natural Sciences': [set(range(7, 10)), 'QNSCI'],
+                                'English': [set(range(7, 13)), 'QENGL']
                                 }
     
     @property
@@ -33,18 +34,17 @@ class Attributes:
         return self.__subject_index
 
 class Inquiry(Attributes):
-    def __init__(self, name, grade, subject, description, urgency, submitted_at, claimed_by=False, inquiry_id=str(uuid.uuid4()), status=InquiryStatus(1)):
+    def __init__(self, name, grade, subject, description, urgency, submitted_at, claimed_by=False, inquiry_id=str(uuid.uuid4()), status=InquiryStatus(1), reference_code=None):
         super().__init__()
-        self.__inquiry_id = inquiry_id
-        self.__learner_name = name
-        self.__grade = grade
-        self.__subject = subject
-        self.__description = description
-        self.__urgency = urgency 
-        self.__submitted_at = submitted_at # "%Y-%m-%d %H:%M:%S"
-        self.__status = status
-        self.__claimed_by = claimed_by if isinstance(claimed_by, str) else 'N/A' #Tutor's name
-        value = self.__urgency
+        def write_code(subject):
+            with open(Path(__name__).parent.parent / "database" / "reference_code.txt", 'r') as f:
+                reader = f.read().strip()
+            to_write = int(reader[-4:])+1
+            with open(Path(__name__).parent.parent / "database" / "reference_code.txt", 'w') as f:
+                reader = f.write(f"{to_write:05d}")
+            code = f"{self.subject_index.get(subject)[1]}{to_write:05d}"
+            return code
+        
         def check_deadline(value):
             if value == 1:
                 return timedelta(hours=24)
@@ -54,6 +54,18 @@ class Inquiry(Attributes):
                 return timedelta(hours=72)
             else:
                 return timedelta(hours=96)
+            
+        self.__inquiry_id = inquiry_id
+        self.__learner_name = name
+        self.__grade = grade
+        self.__subject = subject
+        self.__reference_code = write_code(subject) if reference_code is None else reference_code
+        self.__description = description
+        self.__urgency = urgency 
+        self.__submitted_at = submitted_at # "%Y-%m-%d %H:%M:%S"
+        self.__status = status
+        self.__claimed_by = claimed_by if isinstance(claimed_by, str) else 'N/A' #Tutor's name
+        value = self.__urgency
         self.__deadline = check_deadline(value)
 #define getters and setters before anything else
     
@@ -168,12 +180,16 @@ class Inquiry(Attributes):
         elif self.__urgency in (3, 4) and (value < timedelta(hours=48)):
             raise q.TimeError()
         self.__deadline = value
+
+    @property
+    def reference_code(self):
+        return self.__reference_code
     
     # Methods
     def verify_subject(self, grade):
         grades = self.subject_index.get(self.__subject, -1)
         if grades != -1:
-            if grade not in grades: # -> a set is returned so time complexity is O(n)
+            if grade not in grades[0]: # -> a set is returned so time complexity is O(n)
                 raise ValueError(f"No grade {grade} in {self.__subject}!")
             
     def verify_grade(self, subject):
@@ -183,6 +199,7 @@ class Inquiry(Attributes):
     def to_dict(self):
         return {
             'Inquiry ID': self.__inquiry_id, 
+            'Reference Code': self.__reference_code,
             'Learner Name': self.__learner_name,
             'Grade': self.__grade, 
             'Subject': self.__subject,
@@ -198,7 +215,7 @@ class Inquiry(Attributes):
     def from_dict(cls, data):
         # remember the cls instances
         claimed_by = data['Claimed By'] if data['Claimed By'] != 'N/A' else False
-        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Description'], UrgencyLevel.return_urgency(data['Urgency']), datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), claimed_by, data['Inquiry ID'], InquiryStatus.return_status(data['Status']))
+        return cls(data['Learner Name'], data['Grade'], data['Subject'], data['Description'], UrgencyLevel.return_urgency(data['Urgency']), datetime.strptime(data['Submitted At'], "%Y-%m-%d %H:%M:%S"), claimed_by, data['Inquiry ID'], InquiryStatus.return_status(data['Status']), data['Reference Code'])
         
     def wait_time(self):
         """Returns how long the inquiry has been in the queue"""
@@ -246,6 +263,7 @@ class Inquiry(Attributes):
     def __str__(self):
         return f"""
 ===============  TUTORING INQUIRY ===============
+Reference Code: {self.__reference_code}
 Learner's Name: {self.__learner_name}
 Grade: {self.__grade}
 Subject: {self.__subject}
@@ -270,6 +288,8 @@ Inquiry(
     status={self.__status}, 
     claimed_by={self.__claimed_by}
     inquiry_id={self.__inquiry_id}
+    reference_code={self.__reference_code}
     )
 """
+
     
