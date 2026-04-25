@@ -10,7 +10,7 @@ def run():
     db = DatabaseManager()
     db.load_database_heap(queue)
     db.load_database_history(queue)
-
+    
     while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
         if option not in set(range(1, 7)):
