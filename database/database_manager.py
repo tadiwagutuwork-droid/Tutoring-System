@@ -190,3 +190,8 @@ WHERE status IN (3, 4, 5)
                 return_history.append(Inquiry.from_database(row))
             print(f"Successfully restored {len(return_history)} inquiries.")
             queue.history = return_history
+
+    def clear_database(self):
+        self.cursor.execute('DELETE FROM inquiries')
+        self.cursor.execute('DELETE FROM history')
+        self.conn.commit()
