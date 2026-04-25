@@ -12,6 +12,10 @@ def run():
     db = DatabaseManager()
     db.load_database_heap(queue)
     db.load_database_history(queue)
+    db.cursor.execute("DELETE FROM claimed")
+    db.cursor.execute("DELETE FROM inquiries")
+    db.cursor.execute("DELETE FROM history")
+    db.conn.commit()
 
     while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
@@ -26,7 +30,7 @@ def run():
         elif option == 4:
             handle_cancel(queue, db)
         elif option == 5:
-            handle_resolve(queue, db)
+            handle_resolve(db)
         else:
             print("Thank you for using the Tutoring Queue program. Bye!")
             program = False
@@ -102,8 +106,8 @@ def display_queue(queue, db):
 def display_inquiry(instance):
     print(instance)
 
-def confirm(instance):
-    choice = input(f"{instance.peek()}\nConfirm inquiry (Y/N):").upper()
+def confirm(instance, db):
+    choice = input(f"{instance.peek(db)}\nConfirm inquiry (Y/N):").upper()
     if choice not in {'Y', 'N'}:
         raise ValueError('Invalid error option')
     return choice == 'Y'
@@ -117,7 +121,7 @@ def show_menu():
 ║  [2]  View pending queue             ║
 ║  [3]  Claim next inquiry             ║
 ║  [4]  Cancel an inquiry              ║
-║  [5]  Resolve an inquiry              ║
+║  [5]  Resolve an inquiry             ║
 ║  [6]  Quit                           ║
 ╚══════════════════════════════════════╝
 """
@@ -130,12 +134,13 @@ def handle_submit(instance, db):
     db.add_inquiry(inquiry)
     instance.enqueue(inquiry)
 
+# Fix handle claim in database
 def handle_claim(instance, db):
     tutor_name = input("Enter tutor's name:").strip().title()
     display_inquiry(instance.peek(db))
-    if confirm(instance):
+    if confirm(instance, db):
         inquiry = instance.dequeue(db, tutor_name)
-        db.add_claimed(inquiry)
+        db.update_inquiry(inquiry, 'inquiries')
     else:
         print("INQUIRY NOT HANDLED")
 
@@ -144,12 +149,13 @@ def handle_cancel(queue, db):
     inquiry.cancelled()
     db.update_inquiry(inquiry, 'inquiries')
 
-def handle_view(queue, db):
+def handle_view(queue):
     lst = queue.list_pending()
     if not lst:
         raise err.queue_error.EmptyQueueError()
     widths = {
     'Inquiry ID': 40,
+    'Reference Code': 15,
     'Learner Name': 25,
     'Grade': 8,
     'Subject': 20,
