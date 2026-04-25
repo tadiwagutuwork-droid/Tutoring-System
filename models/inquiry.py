@@ -154,7 +154,7 @@ class Inquiry(Attributes):
     def claimed_by(self, value):
         if not isinstance(value, str):
             raise ValueError("Invalid name given!")
-        self.__claimed_by = value.title()
+        self.__claimed_by = value.title().strip()
         self.status = InquiryStatus.return_status(2) # CLAIMED
 
     @property
@@ -187,7 +187,6 @@ class Inquiry(Attributes):
             'Urgency': self.__urgency.value, 
             'Submitted At': self.__submitted_at.strftime("%Y-%m-%d %H:%M:%S"), # it is a string not an object
             'Status': self.__status.value, 
-            #*****************************************
             'Claimed By': self.__claimed_by
         }
     

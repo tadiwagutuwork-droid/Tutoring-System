@@ -4,17 +4,14 @@ import models as md
 import queues as qu
 import errors as err
 from database import DatabaseManager
-import json
 from datetime import datetime
+
 def run():
     program = True
     queue = qu.TutoringQueue()
     db = DatabaseManager()
     db.load_database_heap(queue)
     db.load_database_history(queue)
-    db.cursor.execute("DELETE FROM inquiries")
-    db.cursor.execute("DELETE FROM history")
-    db.conn.commit()
 
     while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
@@ -125,8 +122,8 @@ def show_menu():
 ╚══════════════════════════════════════╝
 """
 def handle_resolve(db):
-    tutor_name = input("Enter tutor's name:").strip().title()
-    db.resolve_claim(tutor_name)
+    code = input("Enter reference code:").strip().upper()
+    db.resolve_claim(code)
 
 def handle_submit(instance, db):
     inquiry = prompt_new_inquiry()

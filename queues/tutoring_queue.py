@@ -3,7 +3,6 @@ from errors import queue_error as q
 from pathlib import Path
 import heapq
 import models
-import json
 
 class TutoringQueue:
     def __init__(self):
@@ -53,12 +52,12 @@ class TutoringQueue:
     def dequeue(self, db, tutor='N/A'):
         value = heapq.heappop(self.__heap)
         value.claimed_by = tutor
-        db.delete_inquiry(value, 'inquiries')
         if value.status == 1:
             raise q.StatusHistoryError()
         elif value.status == 2:
             return value
         else:
+            db.delete_inquiry(value, 'inquiries')
             db.add_history(value)
             heapq.heappush(self.__history, value)
 

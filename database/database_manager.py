@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 class DatabaseManager:
     def __init__(self):
-        self.conn = sqlite3.connect("tutoring_system.db")
+        self.conn = sqlite3.connect("tutoring_database.db")
         self.cursor = self.conn.cursor()
         self.setup()
     
@@ -90,9 +90,12 @@ CREATE TABLE IF NOT EXISTS history (
         row = self.cursor.fetchone()
         return Inquiry.from_database(row)
     
-    def resolve_claim(self, tutor):
-        self.cursor.execute(f"SELECT * FROM inquiries WHERE claimed_by = ?", (tutor,))
+    def resolve_claim(self, code):
+        self.cursor.execute(f"SELECT * FROM inquiries WHERE reference_code = ?", (code,))
         row = self.cursor.fetchone()
+        
+        if not row:
+            raise ValueError('Invalid reference code')
         inquiry = Inquiry.from_database(row)
         if inquiry.submitted_at + inquiry.deadline <= datetime.now():
             self.add_history(inquiry)
