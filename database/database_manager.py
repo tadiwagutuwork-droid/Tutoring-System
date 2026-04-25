@@ -1,5 +1,7 @@
 import sqlite3
 from models import Inquiry
+from errors import queue_error as q
+from datetime import datetime, timedelta
 
 class DatabaseMananger:
     def __init__(self):
@@ -121,8 +123,18 @@ CREATE TABLE IF NOT EXISTS claimed (
     def search_inquiry(self, reference_code, table):
         self.cursor.execute(f"SELECT * FROM {table} WHERE reference_code = ?", (reference_code,))
         row = self.cursor.fetchone()
-        self.conn.close()
         return Inquiry.from_database(row)
+    
+    def resolve_claim(self, tutor):
+        self.cursor.execute(f"SELECT * FROM claimed WHERE claimed_by = ? ", (tutor,))
+        row = self.cursor.fetchone()
+        inquiry = Inquiry.from_database(row)
+        if inquiry.submitted_at + inquiry.deadline <= datetime.now():
+            self.add_history(inquiry)
+            raise q.MissedInquiryError()
+        inquiry.status = 3
+        self.add_history(inquiry)
+        self.delete_inquiry(inquiry, 'claimed')
     
     def update_inquiry(self, inquiry, table_name):
         # enter what you want to update into variables to write in
@@ -172,8 +184,8 @@ WHERE reference_code = ?
 """, (getter_list[option-1](), inquiry.reference_code))
         self.conn.commit()
     
-    def delete_inquiry(self, inquiry):
-        self.cursor.execute("DELETE FROM inquiries WHERE reference_code = ?", (inquiry.reference_code,))
+    def delete_inquiry(self, inquiry, table):
+        self.cursor.execute(f"DELETE FROM {table} WHERE reference_code = ?", (inquiry.reference_code,))
         self.conn.commit()
 
     def load_database_heap(self, queue):

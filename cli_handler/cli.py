@@ -7,7 +7,6 @@ from database import DatabaseManager
 import json
 from datetime import datetime, timedelta
 
-# ADD RESOLVE SUBMENU - USE CLAIMED TABLE IN DATABASE
 def run():
     program = True
     queue = qu.TutoringQueue()
@@ -17,7 +16,7 @@ def run():
 
     while program:
         option = int(input(f'{show_menu()}\nSelect option:'))
-        if option not in set(range(1, 6)):
+        if option not in set(range(1, 7)):
             raise ValueError("Invalid option selected")
         elif option == 1:
             handle_submit(queue, db)
@@ -27,6 +26,8 @@ def run():
             handle_claim(queue, db)
         elif option == 4:
             handle_cancel(queue, db)
+        elif option == 5:
+            handle_resolve(queue, db)
         else:
             print("Thank you for using the Tutoring Queue program. Bye!")
             program = False
@@ -117,9 +118,13 @@ def show_menu():
 ║  [2]  View pending queue             ║
 ║  [3]  Claim next inquiry             ║
 ║  [4]  Cancel an inquiry              ║
-║  [5]  Quit                           ║
+║  [5]  Resolve an inquiry              ║
+║  [6]  Quit                           ║
 ╚══════════════════════════════════════╝
 """
+def handle_resolve(db):
+    tutor_name = input("Enter tutor's name:").strip().title()
+    db.resolve_claim(tutor_name)
 
 def handle_submit(instance, db):
     inquiry = prompt_new_inquiry()

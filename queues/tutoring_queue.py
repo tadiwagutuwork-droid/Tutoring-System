@@ -53,7 +53,7 @@ class TutoringQueue:
     def dequeue(self, db, tutor='N/A'):
         value = heapq.heappop(self.__heap)
         value.claimed_by = tutor
-        db.delete_inquiry(value)
+        db.delete_inquiry(value, 'inquiries')
         if value.status == 1:
             raise q.StatusHistoryError()
         elif value.status == 2:
