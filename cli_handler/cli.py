@@ -1,5 +1,3 @@
-# # 1. Get current time
-# now = datetime.now() -> return it like this -> submitted_at
 import models as md
 import queues as qu
 import errors as err
