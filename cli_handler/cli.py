@@ -12,7 +12,6 @@ def run():
     db = DatabaseManager()
     db.load_database_heap(queue)
     db.load_database_history(queue)
-    db.cursor.execute("DELETE FROM claimed")
     db.cursor.execute("DELETE FROM inquiries")
     db.cursor.execute("DELETE FROM history")
     db.conn.commit()
@@ -140,14 +139,14 @@ def handle_claim(instance, db):
     display_inquiry(instance.peek(db))
     if confirm(instance, db):
         inquiry = instance.dequeue(db, tutor_name)
-        db.update_inquiry(inquiry, 'inquiries')
+        db.claim_change(inquiry)
     else:
         print("INQUIRY NOT HANDLED")
 
 def handle_cancel(queue, db):
     inquiry = get_inquiry(db)
     inquiry.cancelled()
-    db.update_inquiry(inquiry, 'inquiries')
+    db.cancel_inquiry(inquiry)
 
 def handle_view(queue):
     lst = queue.list_pending()

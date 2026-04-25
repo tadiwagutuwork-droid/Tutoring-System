@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS history (
         return Inquiry.from_database(row)
     
     def resolve_claim(self, tutor):
-        self.cursor.execute(f"SELECT * FROM inquiries WHERE claimed_by = ? ", (tutor,))
+        self.cursor.execute(f"SELECT * FROM inquiries WHERE claimed_by = ?", (tutor,))
         row = self.cursor.fetchone()
         inquiry = Inquiry.from_database(row)
         if inquiry.submitted_at + inquiry.deadline <= datetime.now():
@@ -101,46 +101,49 @@ CREATE TABLE IF NOT EXISTS history (
         self.add_history(inquiry)
         self.delete_inquiry(inquiry, 'inquiries')
     
+    def claim_change(self, instance):
+        self.cursor.execute(f"""
+UPDATE inquiries
+SET status = ?, claimed_by = ?
+WHERE reference_code = ?
+""", (instance.status, instance.claimed_by, instance.reference_code))
+        self.conn.commit()
+
+    def cancel_inquiry(self, instance):
+        self.cursor.execute(f"""
+UPDATE inquiries
+SET status = ?
+WHERE reference_code = ?
+""", (instance.status, instance.reference_code))
+        self.conn.commit()
+
     def update_inquiry(self, inquiry, table_name):
         # enter what you want to update into variables to write in
         fields = [
-    "inquiry_id", 
-    "reference_code", 
     "learner_name", 
     "grade", 
     "subject", 
-    "description", 
-    "urgency", 
-    "submitted_at", 
-    "status", 
-    "claimed_by"
+    "description"
 ]
         getter_list = [
-    lambda: inquiry.inquiry_id,
-    lambda: inquiry.reference_code,
     lambda: inquiry.learner_name,
     lambda: inquiry.grade,
     lambda: inquiry.subject,
     lambda: inquiry.description,
-    lambda: inquiry.urgency.value,
-    lambda: inquiry.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
-    lambda: inquiry.status.value,
-    lambda: inquiry.claimed_by
 ]
         menu = """
 -----------------------------------------
       EDIT INQUIRY FIELD OPTIONS
 -----------------------------------------
- 1. Inquiry ID        6. Description
- 2. Reference Code    7. Urgency
- 3. Learner Name      8. Submitted At
- 4. Grade             9. Status
- 5. Subject          10. Claimed By
+ 1. Learner Name   
+ 2. Grade           
+ 3. Subject     
+ 4. Description      
 -----------------------------------------
 """
         option = int(input(f"{menu}\nEnter field to change: "))
-        if option not in set(range(1, 11)):
-            raise ValueError("Valid innput is between 1-10")
+        if option not in set(range(1, 5)):
+            raise ValueError("Valid innput is between 1-4")
         field_to_change = fields[option-1]
         self.cursor.execute(f"""
 UPDATE {table_name}

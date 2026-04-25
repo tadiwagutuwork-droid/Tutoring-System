@@ -122,14 +122,6 @@ class Inquiry(Attributes):
     def urgency(self):
         return self.__urgency
     
-    @urgency.setter
-    def urgency(self, value):
-        if not isinstance(value, UrgencyLevel):
-            if value not in {1, 2, 3, 4}:
-                raise q.InvalidUrgencyError()
-            value = UrgencyLevel.return_urgency(value)
-        self.__urgency = value
-    
     # add setter for submitted_at -> in case of changes
     @property
     def submitted_at(self):
@@ -168,18 +160,6 @@ class Inquiry(Attributes):
     @property
     def deadline(self):
         return self.__deadline
-    
-    @deadline.setter
-    def deadline(self, value):
-        if not isinstance(value, timedelta):
-            raise ValueError("Value not type of datetime")
-        if self.__urgency == 1 and value > timedelta(hours=24):
-            raise q.TimeError()
-        elif self.__urgency == 2 and (value > timedelta(hours=48) or  value < timedelta(hours=24)):
-            raise q.TimeError()
-        elif self.__urgency in (3, 4) and (value < timedelta(hours=48)):
-            raise q.TimeError()
-        self.__deadline = value
 
     @property
     def reference_code(self):

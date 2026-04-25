@@ -57,7 +57,6 @@ class TutoringQueue:
         if value.status == 1:
             raise q.StatusHistoryError()
         elif value.status == 2:
-            db.add_claimed(value)
             return value
         else:
             db.add_history(value)
