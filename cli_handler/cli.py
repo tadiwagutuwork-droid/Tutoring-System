@@ -5,8 +5,7 @@ import queues as qu
 import errors as err
 from database import DatabaseManager
 import json
-from datetime import datetime, timedelta
-
+from datetime import datetime
 def run():
     program = True
     queue = qu.TutoringQueue()
