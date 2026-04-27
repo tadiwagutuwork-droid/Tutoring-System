@@ -1,6 +1,5 @@
 from operator import attrgetter
 from errors import queue_error as q
-from pathlib import Path
 import heapq
 import models
 

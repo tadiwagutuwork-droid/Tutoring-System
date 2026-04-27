@@ -1,4 +1,3 @@
-import json
 import uuid
 from datetime import datetime, timedelta
 from .urgency_level import UrgencyLevel
@@ -6,13 +5,6 @@ from .inquiry_status import InquiryStatus
 from errors import queue_error as q
 from pathlib import Path
 
-# # 1. Get current time
-# now = datetime.now()
-
-# # 2. Format it as a string
-# formatted_now = now.strftime("%Y-%m-%d %H:%M:%S")
-
-#status -> InquiryStatus
 class Attributes:
     """ For O(1) searching -> faster algorithm """
     def __init__(self):

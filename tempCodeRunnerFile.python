@@ -1,0 +1,14 @@
+import bcrypt
+
+# 1. Hashing a password (during signup)
+password = b"super_secret_password"
+salt = bcrypt.gensalt()
+hashed_password = bcrypt.hashpw(password, salt)
+print(str(hashed_password))
+print(type(str(hashed_password)))
+# 2. Verifying a password (during login)
+user_input = b"super_secret_password"
+if bcrypt.checkpw(user_input, hashed_password):
+    print("Login successful!")
+else:
+    print("Invalid password.")

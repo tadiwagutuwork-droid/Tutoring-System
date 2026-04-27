@@ -41,6 +41,15 @@ CREATE TABLE IF NOT EXISTS history (
         claimed_by TEXT
     )
     """)
+        self.cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+        id TEXT,
+        name TEXT,
+        password_hash TEXT,
+        role TEXT,
+        created_at TEXT
+    )
+    """)
         self.conn.commit()
 
     def add_inquiry(self, inquiry):
@@ -83,6 +92,20 @@ CREATE TABLE IF NOT EXISTS history (
             row['Status'],
             row['Claimed By']
         ))
+        self.conn.commit()
+    
+    def add_user(self, user):
+        row = user.to_database()
+        self.cursor.execute("""
+        INSERT INTO users (
+            id, name, password_hash, role, created_at)
+        VALUES (?, ?, ?, ?, ?)""", (
+            row['ID'], 
+            row['Name'], 
+            row['Password Hash'], 
+            row['Role'], 
+            row['Created At']
+            ))
         self.conn.commit()
 
     def search_inquiry(self, reference_code, table):
