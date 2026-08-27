@@ -1,7 +1,5 @@
 # Tutoring-System
 
-# Tutoring Management System
-
 A modular Python-based tutoring management system designed to manage tutoring inquiries, students, tutors, users, queues, and persistent database storage.
 
 The project was developed as a command-line application with a focus on **Object-Oriented Programming, modular design, database management, queue-based inquiry handling, error handling, and persistent storage**.
